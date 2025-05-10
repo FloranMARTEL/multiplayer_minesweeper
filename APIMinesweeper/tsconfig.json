@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "noEmitOnError": true,
+        "strict": true,
+        "declaration": true,
+        "rootDir": "src",
+        "module": "NodeNext",
+        "moduleResolution": "nodenext"
+    },
+    
+}

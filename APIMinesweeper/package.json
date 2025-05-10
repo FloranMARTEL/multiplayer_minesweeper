@@ -1,0 +1,22 @@
+{
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "undici-types": "^7.8.0"
+  },
+  "name": "apiminesweeper",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npx tsc && node dist/startServeur.js",
+    "autotsc": "npx tsc --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/express": "^5.0.1",
+    "express": "^5.1.0",
+    "undici": "^6.21.2"
+  }
+}
