@@ -6,7 +6,7 @@ let app = express();
 module.exports = app;
 
 
-app.get('/genres', (req : Request, res : Response) => {
+app.get('/test', (req : Request, res : Response) => {
     console.log("bonjour");
     res.status(200).json('{test: "ok"}');
 });
