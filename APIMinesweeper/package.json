@@ -16,7 +16,9 @@
   "description": "",
   "dependencies": {
     "@types/express": "^5.0.1",
+    "@types/websocket": "^1.0.10",
     "express": "^5.1.0",
-    "undici": "^6.21.2"
+    "undici": "^6.21.2",
+    "websocket": "^1.0.35"
   }
 }
