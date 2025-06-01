@@ -1,6 +1,6 @@
-import Bomb from "./Tile/Bomb"
-import SafeTile from "./Tile/Safetile"
-import Tile from "./Tile/Tile"
+import Bomb from "./Tile/Bomb.js"
+import SafeTile from "./Tile/Safetile.js"
+import Tile from "./Tile/Tile.js"
 
 
 const DIR = new Set<[number, number]>([[1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1], [1, 0]]);

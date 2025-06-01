@@ -9,28 +9,32 @@ const PORT = 5000
 
 // app.listen(PORT);
 
+import { WebSocketServer,WebSocket } from "ws";
 
-const webSocketServer = require('websocket').server;
-const http = require('http');
+import http from 'http';
 
 const server = http.createServer();
 server.listen(PORT)
 
-
-const wsServer = new webSocketServer({
-  httpServer: server
+const wsServer = new WebSocketServer({
+  server : server
 });
 
 
-const clients = [];
+const clients : WebSocket[] = [];
 
-wsServer.on('request', (request : any)=>{
+wsServer.on('connection', (socket : WebSocket)=>{
 
-    console.log('org', request.origin + '.')
+  console.log("connection")
+  clients.push(socket)
 
-    clients.push(request.accept(null,request.origin))
-})
+  socket.on("message", (data : String | Buffer)=>{
 
-wsServer.on('message',( message : any) =>{
-    console.log(message.utf8Data);
+    console.log(data.toString())
+
+    clients.forEach((cli : WebSocket)=>{
+      cli.send("bonjour");
+    })
+
+  })
 })

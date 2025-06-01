@@ -1,9 +1,6 @@
 import React from "react";
 
-import { w3cwebsocket as W3CWebSocket } from "websocket";
-
-const client = new W3CWebSocket('ws://localhost:5000');
-
+const client = new WebSocket('ws://localhost:5000');
 
 export default class Home extends React.Component{
     
@@ -11,6 +8,17 @@ export default class Home extends React.Component{
         super(props);
         client.onopen = () =>{
             console.log("connected");
+        }
+
+        client.onmessage = (event) => {
+
+            const data = event.data
+            console.log(" <- " + data.toString())
+
+        }
+
+        client.onclose = () => {
+            console.log("connection closed")
         }
     }
 

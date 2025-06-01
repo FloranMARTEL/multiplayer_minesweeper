@@ -1,4 +1,4 @@
-import SafeTile from "./Safetile"
+import SafeTile from "./Safetile.js"
 
 export default interface Tile{
 

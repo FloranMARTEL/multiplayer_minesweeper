@@ -5,7 +5,7 @@
         "strict": true,
         "declaration": true,
         "rootDir": "src",
-        "module": "NodeNext",
+        "module": "node18",
         "moduleResolution": "nodenext"
     },
     

@@ -1,5 +1,5 @@
-import Board from "./Board";
-import Tile from "./Tile/Tile";
+import Board from "./Board.js";
+import Tile from "./Tile/Tile.js";
 
 const DIR = new Set<[number, number]>([[1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1], [1, 0]]);
 

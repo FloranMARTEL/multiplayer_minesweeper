@@ -1,5 +1,5 @@
-import Tile from "./Tile";
-import SafeTile from "./Safetile"
+import Tile from "./Tile.js";
+import SafeTile from "./Safetile.js"
 
 export default class Bomb implements Tile{
 
