@@ -9,25 +9,25 @@ const DIR = new Set<[number, number]>([[1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1
 export default class Board {
 
     seed: number
-    hight: number
+    height: number
     width: number
     indexlimit : number
     nbBomb: number
     tiles: Tile[]
 
 
-    constructor(seed: number | null, hight: number, width: number, nbBomb: number) {
+    constructor(seed: number | null, height: number, width: number, nbBomb: number) {
 
         if (seed == null) {
             seed = Math.random()
         }
         this.seed = seed
 
-        this.hight = hight
+        this.height = height
         this.width = width
         this.nbBomb = nbBomb
 
-        this.indexlimit = this.hight * this.width
+        this.indexlimit = this.height * this.width
 
         this.tiles = []
         this.init_tiles()

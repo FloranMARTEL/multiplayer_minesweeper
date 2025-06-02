@@ -8,7 +8,7 @@ enum GameStatus {
     Over
 }
 
-class Game {
+export default class Game {
 
     board: Board
     gameStatus: GameStatus
@@ -17,8 +17,8 @@ class Game {
 
 
 
-    constructor(seed: number | null, hight: number, width: number, nbBomb: number) {
-        this.board = new Board(seed, hight, width, nbBomb)
+    constructor(seed: number | null, height: number, width: number, nbBomb: number) {
+        this.board = new Board(seed, height, width, nbBomb)
         this.gameStatus = GameStatus.InGame
         this.discoveredTiles = new Set()
         this.flags = new Set()

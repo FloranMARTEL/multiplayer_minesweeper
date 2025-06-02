@@ -1,0 +1,18 @@
+
+.board{
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.board > div{
+    display: flex;
+    flex-direction: row;
+}
+
+.board > div > div{
+    background-color: grey;
+    border: 1px solid black;
+    width: 20px;
+    height: 20px;
+}
