@@ -6,7 +6,8 @@
         "declaration": true,
         "rootDir": "src",
         "module": "node18",
-        "moduleResolution": "nodenext"
+        "moduleResolution": "nodenext",
+        "sourceMap": true
     },
     
 }

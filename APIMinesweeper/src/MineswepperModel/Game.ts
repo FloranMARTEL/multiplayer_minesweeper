@@ -1,4 +1,6 @@
+import { start } from "repl";
 import Board from "./Board.js";
+import SafeTile from "./Tile/Safetile.js";
 import Tile from "./Tile/Tile.js";
 
 const DIR = new Set<[number, number]>([[1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1], [1, 0]]);
@@ -10,11 +12,10 @@ enum GameStatus {
 
 export default class Game {
 
-    board: Board
-    gameStatus: GameStatus
-    discoveredTiles : Set<Tile>
-    flags : Set<number>
-
+    private board: Board
+    private gameStatus: GameStatus
+    private discoveredTiles: Set<Tile>
+    private flags: Set<number>
 
 
     constructor(seed: number | null, height: number, width: number, nbBomb: number) {
@@ -24,39 +25,73 @@ export default class Game {
         this.flags = new Set()
     }
 
-    discoverTileWithIndex(index: number) : Set<Tile> {
-        const tile: Tile = this.board.getTileWithIndex(index)
-        if (this.discoveredTiles.has(tile)){
-            return new Set()
+    discoverTileWithIndex(index: number): { [key: number]: SafeTile } {
+        const startTile: Tile = this.board.getTileWithIndex(index);
+        if (this.discoveredTiles.has(startTile)) {
+            return {};
         }
 
-        let tilesfound : Set<Tile> = new Set()
-
-        if (!tile.discover()) {
+        if (!startTile.discover()){
             this.gameStatus = GameStatus.Over
-        } else {
-            this.discoveredTiles.add(tile)
-            tilesfound.add(tile)
-            const value = tile.getValue()
-            if (value == 0) {
-                DIR.forEach((direction: [number, number]) => {
-                    const targetIndex = index + direction[0] * this.board.width + direction[1];
-                    if (targetIndex < this.board.indexlimit) {
-                        tilesfound = new Set([...tilesfound,...this.discoverTileWithIndex(targetIndex)]);
+            return {}
+        }
+
+        this.discoveredTiles.add(startTile);
+
+        const tilesFound: { [key: number]: SafeTile } = {};
+        const stack: number[] = [index];
+
+        while (stack.length > 0) {
+            const currentIndex = stack.pop()!;
+            const tile = this.board.getTileWithIndex(currentIndex) as SafeTile;
+
+            tilesFound[currentIndex] = tile;
+
+            const value = tile.getValue();
+            if (value === 0) {
+                for (const direction of DIR) {
+                    const [dx, dy] = direction;
+                    const targetIndex = currentIndex + dx * this.board.width + dy;
+
+                    if (targetIndex >= 0 && targetIndex < this.board.indexlimit) {
+                        const neighborTile = this.board.getTileWithIndex(targetIndex);
+                        if (!this.discoveredTiles.has(neighborTile)) {
+                            this.discoveredTiles.add(neighborTile)
+                            stack.push(targetIndex);
+                        }
                     }
-                })
+                }
             }
         }
 
-        return tilesfound
+        return tilesFound;
     }
 
-    placeFlag( index : number){
+    discoverTileWithRowAndCol(row: number, col: number): { [key: number]: SafeTile } {
+        const index = row * this.board.width + col
+        return this.discoverTileWithIndex(index);
+    }
 
-        if (index >= this.board.indexlimit){
+    placeFlag(index: number) {
+
+        if (index >= this.board.indexlimit) {
             throw Error("you can't put flag hire")
         }
 
         this.flags.add(index);
+    }
+
+    getwidth() {
+        return this.board.width
+    }
+    getheight() {
+        return this.board.height
+    }
+    getnbBomb() {
+        return this.board.nbBomb
+    }
+
+    getGameStatus(): GameStatus {
+        return this.gameStatus
     }
 }

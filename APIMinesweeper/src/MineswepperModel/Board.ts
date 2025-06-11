@@ -51,7 +51,7 @@ export default class Board {
             indexBomb.add(indexs[i]);
         }
 
-        for (let i = 0; i < this.nbBomb; i++) {
+        for (let i = 0; i < this.indexlimit; i++) {
             let newTile: Tile
             if (indexBomb.has(i)) {
                 newTile = new Bomb()
@@ -81,11 +81,11 @@ export default class Board {
     }
 
     getTileWithIndex(index : number) : Tile{
-        if (index >= this.indexlimit){
-            throw Error("index out of board")
+        if (index >= this.indexlimit || index < 0){
+            throw Error("index out of board");
         }
-        const tile : Tile = this.tiles[index]
-        return tile
+        const tile : Tile = this.tiles[index];
+        return tile;
     }
 }
 

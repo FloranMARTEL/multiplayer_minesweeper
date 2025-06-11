@@ -15,4 +15,19 @@
     border: 1px solid black;
     width: 20px;
     height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.board > div > div > img{
+    width: 15px;
+    height: 15px;
+    image-rendering: pixelated
+}
+
+
+.board > div > div.show{
+    background-color: rgb(255, 255, 255);
 }

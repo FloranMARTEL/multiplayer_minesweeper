@@ -40,7 +40,7 @@ wsServer.on('connection', (socket : WebSocket)=>{
 
     const message = JSON.parse(data.toString());
     console.log(" <-- message" )
-    if (message.type == "CreateGame"){
+    if (message.type === "CreateGame"){
 
       console.log(
         "nbBomb : "+message.nbBomb
@@ -51,14 +51,34 @@ wsServer.on('connection', (socket : WebSocket)=>{
       gamelist[id] = game
 
       console.log(
-        "nbBomb : "+game.board.nbBomb
+        "nbBomb : "+game.getnbBomb()
       )
       
       socket.send(JSON.stringify({
         type : "CreateGame",
-        height : game.board.height,
-        width : game.board.width,
-        nbBomb : game.board.nbBomb
+        height : game.getheight(),
+        width : game.getwidth(),
+        nbBomb : game.getnbBomb()
+      }))
+
+    }
+
+    else if (message.type === "ShowCell"){
+
+      const row = message.row
+      const col = message.col
+
+      const game = gamelist[id];
+      const tiles = game.discoverTileWithRowAndCol(row,col)
+      
+      const tilesmaped = Object.fromEntries(
+      Object.entries(tiles).map(([k, t]) => [k, t.getValue()])
+    );
+            
+      socket.send(JSON.stringify({
+        type : "ShowCell",
+        tiles : tilesmaped,
+        gamestatus : game.getGameStatus()
       }))
 
     }
