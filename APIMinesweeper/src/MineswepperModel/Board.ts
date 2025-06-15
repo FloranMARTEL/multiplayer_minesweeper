@@ -63,13 +63,24 @@ export default class Board {
 
 
         indexBomb.forEach((index: number) => {
+            const row = Math.floor(index/this.width)
+            const col = index%this.width
+
             DIR.forEach(( direction : [number,number])=>{
+                
+                const rowtarget = row + direction[0]
+                const coltarget = col + direction[1]
                 const targetIndex = index + direction[0]*this.width + direction[1];
-                if ( targetIndex < this.indexlimit){
+
+
+                if ( rowtarget >= 0 && rowtarget < this.height &&
+                    coltarget >= 0 && coltarget < this.width
+                ){
                     const tagetTile : Tile = this.tiles[targetIndex]
                     if (tagetTile instanceof SafeTile){
                         tagetTile.incrementValue()
                     }
+
                 }
             })
         })

@@ -5,7 +5,7 @@ import Tile from "./Tile/Tile.js";
 
 const DIR = new Set<[number, number]>([[1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1], [1, 0]]);
 
-enum GameStatus {
+export enum GameStatus {
     InGame,
     Over
 }
@@ -31,7 +31,7 @@ export default class Game {
             return {};
         }
 
-        if (!startTile.discover()){
+        if (!startTile.discover()) {
             this.gameStatus = GameStatus.Over
             return {}
         }
@@ -49,11 +49,20 @@ export default class Game {
 
             const value = tile.getValue();
             if (value === 0) {
+
+                const row = Math.floor(currentIndex / this.board.width)
+                const col = currentIndex % this.board.width
+
                 for (const direction of DIR) {
                     const [dx, dy] = direction;
-                    const targetIndex = currentIndex + dx * this.board.width + dy;
+                    const rowtarget = row + dx
+                    const coltarget = col + dy
 
-                    if (targetIndex >= 0 && targetIndex < this.board.indexlimit) {
+                    const targetIndex = rowtarget * this.board.width + coltarget;
+
+                    if (rowtarget >= 0 && rowtarget < this.board.height &&
+                        coltarget >= 0 && coltarget < this.board.width
+                    ) {
                         const neighborTile = this.board.getTileWithIndex(targetIndex);
                         if (!this.discoveredTiles.has(neighborTile)) {
                             this.discoveredTiles.add(neighborTile)
@@ -72,13 +81,28 @@ export default class Game {
         return this.discoverTileWithIndex(index);
     }
 
-    placeFlag(index: number) {
+    placeFlagWithRowAndCol(row: number, col: number){
+        const index = this.RowAndColToIndex(row,col)
+        this.placeFlag(index)
+    }
 
+    placeFlag(index: number) {
         if (index >= this.board.indexlimit) {
             throw Error("you can't put flag hire")
         }
-
         this.flags.add(index);
+    }
+
+    RemouveFlagWithRowAndCol(row: number, col: number){
+        const index = this.RowAndColToIndex(row,col)
+        this.RemouveFlag(index)
+    }
+
+    RemouveFlag(index: number) {
+        if (index >= this.board.indexlimit) {
+            throw Error("you can't put flag hire")
+        }
+        this.flags.delete(index);
     }
 
     getwidth() {
@@ -94,4 +118,17 @@ export default class Game {
     getGameStatus(): GameStatus {
         return this.gameStatus
     }
+
+
+    private indexToRowAndCol(index: number) : {row:number,col:number} {
+        const row = Math.floor(index / this.board.width)
+        const col = index % this.board.width
+        return {row,col}
+    }
+
+    private RowAndColToIndex(row:number,col:number) : number {
+        const index = row * this.board.width + col
+        return index
+    }
+
 }

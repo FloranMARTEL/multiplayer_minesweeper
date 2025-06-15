@@ -9,7 +9,9 @@ type MyProps = {
     height: number,
     width: number,
     nbBomb: number,
-    eventCell: (r: number, c: number) => void
+    sendDiscoverTile: (r: number, c: number) => void
+    sendSetFlag: (r: number, c: number) => void
+    sendRemouveFlag: (r: number, c: number) => void
 }
 
 export default class Board extends React.Component<MyProps, MyState> {
@@ -34,11 +36,27 @@ export default class Board extends React.Component<MyProps, MyState> {
             const indexTileNumber = Number(indextile)
             const row = Math.floor(indexTileNumber/this.props.width)
             const col = indexTileNumber%this.props.width
-            console.log(row,col)
             const tileref = this.tiles[row][col]
             if (tileref.current){
                 tileref.current.updateValue(tilesdict[indextile])
             }
+        }
+    }
+
+    setflag(row:number, col : number){
+        const tileref = this.tiles[row][col]
+        
+        if (tileref.current){
+            tileref.current.setFlag()
+        }
+    }
+
+    
+    remouveflag(row:number, col : number){
+        const tileref = this.tiles[row][col]
+        
+        if (tileref.current){
+            tileref.current.remouveFlag()
         }
     }
 
@@ -51,7 +69,12 @@ export default class Board extends React.Component<MyProps, MyState> {
 
             for (let c = 0; c < this.props.width; c++) {
                 columne.push(
-                    <Cell ref={this.tiles[l][c]} key={c} onClick={() => this.props.eventCell(l, c)} />
+                    <Cell ref={this.tiles[l][c]}
+                    key={c}
+                    sendDiscoverTile={() => this.props.sendDiscoverTile(l, c)}
+                    sendSetFlag={()=> this.props.sendSetFlag(l,c)}
+                    sendRemouveFlag={()=> this.props.sendRemouveFlag(l,c)}
+                    />
                 );
             }
 

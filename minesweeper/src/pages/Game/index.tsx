@@ -51,24 +51,46 @@ export default class Game extends React.Component<MyProps, MyState> {
 
                 console.log(jsonmessage)
             }
+            else if (jsonmessage.type === "Flag"){
+                const action = jsonmessage.action
+                const row = jsonmessage.row
+                const col = jsonmessage.col
+                if (this.boardRef.current){
+                    if (action === "set"){
+                        this.boardRef.current.setflag(row,col)
+                    }else if (action === "remouve"){
+                        this.boardRef.current.remouveflag(row,col)
+                    }
+                }
+                
+            }
         }
         client.onclose = () => {
             console.log("connection closed")
         }
     }
 
-    onclick() {
-        console.log("bonjour");
+    sendDiscoverTile(r: number, c: number) {
         client.send(JSON.stringify({
-            type: "message",
-            msg: "bonjour",
+            type: "ShowCell",
+            row: r,
+            col: c
         }))
     }
 
-    clickOnCell(r: number, c: number) {
-        console.log("click")
+    sendSetFlag(r: number, c: number){
         client.send(JSON.stringify({
-            type: "ShowCell",
+            type: "Flag",
+            action: "set",
+            row: r,
+            col: c
+        }))
+    }
+
+    sendRemouveFlag(r: number, c: number){
+        client.send(JSON.stringify({
+            type: "Flag",
+            action: "remouve",
             row: r,
             col: c
         }))
@@ -79,7 +101,15 @@ export default class Game extends React.Component<MyProps, MyState> {
 
         let board = null
         if (this.state.boardstate != null) {
-            board = <Board ref={this.boardRef} height={this.state.boardstate.height} width={this.state.boardstate.width} nbBomb={this.state.boardstate.nbBomb} eventCell={this.clickOnCell}></Board>
+            board = <Board
+            ref={this.boardRef}
+            height={this.state.boardstate.height}
+            width={this.state.boardstate.width}
+            nbBomb={this.state.boardstate.nbBomb}
+            sendDiscoverTile={this.sendDiscoverTile}
+            sendSetFlag={this.sendSetFlag}
+            sendRemouveFlag={this.sendRemouveFlag}
+            ></Board>
         }
         return (
             <div>
