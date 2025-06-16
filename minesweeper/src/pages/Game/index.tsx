@@ -21,17 +21,17 @@ export default class Game extends React.Component<MyProps, MyState> {
         this.boardRef = React.createRef<Board>();
 
         client.onopen = () => {
-            console.log("connected");
+            console.log("Client connected");
 
             client.send(JSON.stringify({
                 type: "CreateGame",
                 width: 10,
                 height: 10,
                 nbBomb: 10,
+                id:0
             }))
         }
         client.onmessage = (event: MessageEvent) => {
-            console.log(" <-- " + event.data.toString())
             const jsonmessage = JSON.parse(event.data.toString());
             console.log(jsonmessage)
             if (jsonmessage.type === "CreateGame") {
