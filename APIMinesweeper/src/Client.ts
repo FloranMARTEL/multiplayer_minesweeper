@@ -1,20 +1,22 @@
 
-import Game from "./MineswepperModel/Game.js"
-import { GameStatus } from "./MineswepperModel/Game.js"
 
+import Utilisateur from "./model/Utilisateur.js";
+import GameRoom from "./GameRoom.js";
 
 import { WebSocketServer, WebSocket } from "ws";
+import { util } from "undici";
+import { timeLog } from "console";
 
 
 export default class Client {
     socket: WebSocket
-    id : number | null
-    game: Game | null
+    utilisateur : Utilisateur | null
+    gameRoom: GameRoom | null
 
     constructor(socket: WebSocket) {
         this.socket = socket
-        this.game = null
-        this.id = null
+        this.gameRoom = null
+        this.utilisateur = null
 
         this.socket.on("message", (data: String | Buffer) => {
 
@@ -22,6 +24,12 @@ export default class Client {
 
             if (message.type === "CreateGame") {
                 this.createGame(message)
+            }
+            else if (message.type === "JoinGame"){
+                this.joinGame(message)
+            }
+            else if (message.type === "StartGame"){
+                this.startGame(message)
             }
             else if (message.type === "ShowCell") {
                 this.showTile(message)
@@ -37,28 +45,68 @@ export default class Client {
     }
 
     createGame(message: any) {
-        const game = new Game(null, message.height, message.width, message.nbBomb, 2)
-        this.game = game
-        this.id = message.id
+        const utilisateur = Utilisateur.GetUser(message.token)
+        if (utilisateur == null){
+            this.socket.send(JSON.stringify({
+                type: "erreur",
+                message: "aucun utilisateur ne corespond à ce token"
+            }))
+            return
+        }
+        this.utilisateur = utilisateur
+
+
+        const roomSize = message.roomSize
+        const height = message.height
+        const width = message.width
+        const nbBomb = message.nbBomb
+
+        this.gameRoom = new GameRoom(this,roomSize,height,width,nbBomb)
 
         this.socket.send(JSON.stringify({
             type: "CreateGame",
-            id: game.getid(),
-            height: game.getheight(),
-            width: game.getwidth(),
-            nbBomb: game.getnbBomb()
+            roomId: this.gameRoom.getRoomID(),
+            height: this.gameRoom.getHeight(),
+            width: this.gameRoom.getWidth(),
+            nbBomb: this.gameRoom.getNbBomb(),
+            roomSize: this.gameRoom.getRoomSize()
         }))
     }
 
     joinGame(message:any) {
-        this.id = message.id
+        const utilisateur = Utilisateur.GetUser(message.token)
+        if (utilisateur == null){
+            this.socket.send(JSON.stringify({
+                type: "erreur",
+                message: "aucun utilisateur ne corespond à ce token"
+            }))
+            return
+        }
+        this.utilisateur = utilisateur
 
-        //TODO
+        const roomId = message.roomId
+
+        const gameroom = GameRoom.GetGameRoom(roomId);
+        if (gameroom === null){
+            this.socket.send(JSON.stringify({
+                type: "erreur",
+                message: "cette partie n'existe pas"
+            }))
+            return
+        }
+        this.gameRoom = gameroom
+
+        this.gameRoom.joinGameRoom(this) //check si la parti est plenne
+        
+    }
+
+    startGame(message : any){
+        console.log("TODO", message)
     }
 
     showTile(message: any) {
 
-        if (!this.game) {
+        if (this.gameRoom === null) {
             this.socket.send(JSON.stringify({
                 type: "erreur",
                 message: "vous n'êtes pas dans une partie"
@@ -66,31 +114,24 @@ export default class Client {
             return
         }
 
+        if (this.utilisateur === null){
+            this.socket.send(JSON.stringify({
+                type: "erreur",
+                message: "vous n'êtes pas identifier"
+            }))
+            return
+        }
+
+        ////
+
         const row = message.row
         const col = message.col
-        const tiles = this.game.discoverTileWithRowAndCol(row, col)
+        this.gameRoom.discoverTile(this.utilisateur,row, col)
 
-        if (this.game.getGameStatus() === GameStatus.Over) {
-            this.socket.send(JSON.stringify({
-                type: "GameOver"
-            }))
-            this.socket.close()
-        }
-        else {
-            const tilesmaped = Object.fromEntries(
-                Object.entries(tiles).map(([k, t]) => [k, t.getValue()])
-            );
-
-            this.socket.send(JSON.stringify({
-                type: "ShowCell",
-                tiles: tilesmaped,
-                gamestatus: this.game.getGameStatus()
-            }))
-        }
     }
 
     flag(message: any) {
-        if (!this.game || this.id === null){
+        if (!this.gameRoom || this.utilisateur === null){
             this.socket.send(JSON.stringify({
                 type: "erreur",
                 message: "vous n'êtes pas dans une partie"
@@ -102,26 +143,10 @@ export default class Client {
         const row = message.row
         const col = message.col
 
-
         if (action === "set") {
-            this.game.placeFlagWithRowAndCol(row, col,this.id)
-            this.socket.send(JSON.stringify({
-                type: "Flag",
-                action: "set",
-                row: row,
-                col: col
-            }))
+            this.gameRoom.setFlag(this.utilisateur,row,col)
         } else if (action === "remouve") {
-            this.game.RemouveFlagWithRowAndCol(row, col,this.id)
-            this.socket.send(JSON.stringify({
-                type: "Flag",
-                action: "remouve",
-                row: row,
-                col: col
-            }))
+            this.gameRoom.remouveFlag(this.utilisateur,row,col)
         }
     }
-
-
-
 }

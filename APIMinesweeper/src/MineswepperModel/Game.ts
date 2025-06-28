@@ -12,44 +12,23 @@ export enum GameStatus {
 
 export default class Game {
 
-    private static cptID = 0
-
-    private id: number
     private board: Board
     private gameStatus: GameStatus
     private discoveredTiles: Set<Tile>
-    private nbplayer
 
-    private players: { [key: number]: number }
-    private flags: Set<number>[]
-
-    freePlace: number[]
+    private flags: { [key : number] : Set<number>}
 
 
-
-    constructor(seed: number | null, height: number, width: number, nbBomb: number, nbplayer: number) {
-        this.id = Game.cptID++
+    constructor(seed: number | null, height: number, width: number, nbBomb: number, idplayers : number[]) {
         this.board = new Board(seed, height, width, nbBomb)
         this.gameStatus = GameStatus.InGame
         this.discoveredTiles = new Set()
 
-        this.nbplayer = nbplayer
+        this.flags = {}
+        idplayers.forEach((idplayer)=>{
+            this.flags[idplayer] = new Set<number>()
+        })
 
-        this.flags = Array.from({ length: this.nbplayer }, () => new Set());
-        this.players = {}
-
-        this.freePlace = Array.from({ length: this.nbplayer }, (_, i) => i);
-
-    }
-
-    addplayer(playerId: number): boolean {
-
-        const place = this.freePlace.pop();
-        if (place) {
-            this.players[playerId] = place
-            return true
-        }
-        return false
     }
 
     discoverTileWithIndex(index: number): { [key: number]: SafeTile } {
@@ -108,16 +87,16 @@ export default class Game {
         return this.discoverTileWithIndex(index);
     }
 
-    placeFlagWithRowAndCol(row: number, col: number, numplayer: number) {
+    placeFlagWithRowAndCol(row: number, col: number, idplayer: number) {
         const index = this.RowAndColToIndex(row, col)
-        this.placeFlag(index, numplayer)
+        this.placeFlag(index, idplayer)
     }
 
-    placeFlag(index: number, numplayer: number) {
+    placeFlag(index: number, idplayer: number) {
         if (index >= this.board.indexlimit) {
             throw Error("you can't put flag hire")
         }
-        this.flags[numplayer].add(index);
+        this.flags[idplayer].add(index);
     }
 
     RemouveFlagWithRowAndCol(row: number, col: number, numplayer: number) {
@@ -132,9 +111,6 @@ export default class Game {
         this.flags[numplayer].delete(index);
     }
 
-    getid() {
-        return this.id
-    }
 
     getwidth() {
         return this.board.width
@@ -161,5 +137,6 @@ export default class Game {
         const index = row * this.board.width + col
         return index
     }
+
 
 }

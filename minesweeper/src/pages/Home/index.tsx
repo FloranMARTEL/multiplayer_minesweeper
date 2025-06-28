@@ -1,48 +1,34 @@
 import React from "react";
-import { data } from "react-router-dom";
 
-const client = new WebSocket('ws://localhost:5000');
+import { useParams, useNavigate, useLocation, NavigateFunction, Location, Params } from 'react-router-dom';
+
+
+
+
+export default function HomeWrapper(){
+  const navigate = useNavigate();
+ return (
+    <Home navigate={navigate} ></Home>
+ )
+}
+
 
 type State = {}
-type Props = {}
-
-export default class Home extends React.Component<Props, State> {
+type Props = {
+    navigate:NavigateFunction
+}
+class Home extends React.Component<Props, State> {
     
     constructor(props : Props){
         super(props);
-        client.onopen = () =>{
-            console.log("connected");
-        }
-        client.onmessage = (event : MessageEvent) => {
-            const data = event.data
-            console.log(" <- " + data.toString())
-        }
-        client.onclose = () => {
-            console.log("connection closed")
-        }
-
-
-        client.send(JSON.stringify({
-            type : "CreateGame",
-            width : 10,
-            heigth : 10,
-            boomb : 10,
-        }))
-    }
-
-    onclick(){
-        console.log("bonjour");
-        client.send(JSON.stringify({
-            type : "message",
-            msg: "bonjour",
-        }))
     }
 
     render(){
         return(
-            <div>
-                <button onClick={this.onclick}>Send</button>
-            </div>
+            <main>
+                <button onClick={()=>{this.props.navigate("/game/createRoom")}}>Crée une partie</button>
+                <button onClick={()=>{this.props.navigate("/game/joinRoom")}}>rejoindre une partie</button>
+            </main>
         )
     }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Home from "./pages/Home"
-import Game from './pages/Game';
+import GameManagerWrapper from './pages/GameManager';
 
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Home />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/game/:path" element={<GameManagerWrapper />} />
 
       </Routes>
 
