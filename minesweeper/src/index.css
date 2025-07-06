@@ -11,3 +11,77 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+:root {
+  --greyLime: #E8E8E8;
+  --grey: #BDBDBD;
+  --greyDark: #7B7B7B;
+  --greyDark2: #898989
+  --black: #000;
+}
+
+
+@font-face {
+  font-family: 'Pixelif'; /* nom que tu vas utiliser */
+  src: url('../public/font/PixelifySans-VariableFont_wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+
+body {
+  background-color: #aaa; /* gris clair */
+  background-image: url('../public/noise.svg');
+  background-repeat: repeat;
+}
+
+
+/* linear-gradient(0, var(--black), #FFF),  */
+
+h2 {
+  margin: 0px;
+}
+
+span,h2,h1,h3,p,button{
+  font-family: "Pixelif";
+}
+
+
+
+main {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  height: 100%;
+
+  margin: 10% 10%;
+  gap: 25px;
+
+}
+
+
+.boxOut {
+  background-color: var(--grey);
+
+  border-top: 4px solid var(--greyLime);
+  border-left: 4px solid var(--greyLime);
+
+  box-shadow: inset -4px -4px var(--greyDark);
+
+  padding: 24px;
+}
+
+.boxIn {
+  background-color: var(--grey);
+
+  border-top: 4px solid var(--greyDark);
+  border-left: 4px solid var(--greyDark);
+
+  box-shadow: inset -4px -4px var(--greyLime);
+
+  padding: 24px;
+}

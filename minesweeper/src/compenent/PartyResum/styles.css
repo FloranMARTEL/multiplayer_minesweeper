@@ -1,0 +1,20 @@
+.partyResum{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+.partyResum > div{
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    flex-grow: 1;
+}
+
+.partyResum > div > span{
+   display: flex; 
+   align-content: center;
+   justify-content: center;
+   gap: 4px;
+}

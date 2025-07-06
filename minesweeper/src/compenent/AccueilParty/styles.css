@@ -1,0 +1,18 @@
+.home{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+}
+
+.listringPartyBox{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.managerGameButtonBox{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
