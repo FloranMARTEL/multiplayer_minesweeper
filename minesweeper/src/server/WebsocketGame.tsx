@@ -1,4 +1,5 @@
-
+import { json } from "stream/consumers";
+import ApiMinesweeper from "./ApiMinesweeper";
 
 export default class WebsocketGame {
 
@@ -9,7 +10,10 @@ export default class WebsocketGame {
         setGameStatus: (height: number, width: number, nbBomb: number, roomId: number, roomSize : number) => void,
         updateTiles: (tiles: { [key: number]: number }) => void,
         setflag: (row: number, col: number) => void,
-        remouveflag: (row: number, col: number) => void
+        remouveflag: (row: number, col: number) => void,
+        setPlayersList: ( players : {name : string, flag: string}[] ) => void,
+        addPlayer: (player : {name : string, flag: string}) => void,
+        initGameBoard: () => void
     ) {
         console.log("creaction websocket")
         this.client = new WebSocket('ws://localhost:5000');
@@ -29,9 +33,33 @@ export default class WebsocketGame {
             console.log(jsonmessage)
             if (jsonmessage.type === "CreateGame") {
                 setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
+                
+                ApiMinesweeper.GetPlayerResumByID(jsonmessage.hostId)
+                .then((player)=>{
+                    addPlayer(player)
+                })
 
             }else if (jsonmessage.type === "JoinGame") {
                 setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
+                
+                //set player list
+                const playersId = jsonmessage.playersId as number[];
+                Promise.all(playersId.map(async (playerId : number) => {
+                    return await ApiMinesweeper.GetPlayerResumByID(playerId)
+                })).then((players)=>{
+                    setPlayersList(players)
+                })
+                
+            }else if (jsonmessage.type === "NewPlayer"){
+
+                ApiMinesweeper.GetPlayerResumByID(jsonmessage.playerId)
+                .then((player)=>{
+                    addPlayer(player)
+                })
+
+            }else if (jsonmessage.type === "StartGame"){
+                initGameBoard()
+            
             }else if (jsonmessage.type === "ShowCell") {
                 const tiles = jsonmessage.tiles as { [key: number]: number }
                 updateTiles(tiles)
@@ -61,7 +89,7 @@ export default class WebsocketGame {
             width: 10,
             height: 10,
             nbBomb: 10,
-            gameSize : 2,
+            roomSize : 10,
             token: 0
         }))
     }
@@ -99,6 +127,12 @@ export default class WebsocketGame {
             action: "remouve",
             row: r,
             col: c
+        }))
+    }
+
+    sendStartGame(){
+        this.client.send(JSON.stringify({
+            type:"StartGame"
         }))
     }
 

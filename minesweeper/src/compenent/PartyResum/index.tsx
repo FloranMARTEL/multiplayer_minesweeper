@@ -1,4 +1,6 @@
 import React from "react";
+import { NavigateFunction } from 'react-router-dom';
+
 
 import ButtonSmal from "../ButtonSmal";
 

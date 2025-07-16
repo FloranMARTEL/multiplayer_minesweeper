@@ -29,7 +29,7 @@ export default class Client {
                 this.joinGame(message)
             }
             else if (message.type === "StartGame"){
-                this.startGame(message)
+                this.startGame()
             }
             else if (message.type === "ShowCell") {
                 this.showTile(message)
@@ -60,8 +60,8 @@ export default class Client {
         const height = message.height
         const width = message.width
         const nbBomb = message.nbBomb
-
         this.gameRoom = new GameRoom(this,roomSize,height,width,nbBomb)
+
 
         this.socket.send(JSON.stringify({
             type: "CreateGame",
@@ -69,7 +69,8 @@ export default class Client {
             height: this.gameRoom.getHeight(),
             width: this.gameRoom.getWidth(),
             nbBomb: this.gameRoom.getNbBomb(),
-            roomSize: this.gameRoom.getRoomSize()
+            roomSize: this.gameRoom.getRoomSize(),
+            hostId : this.utilisateur.id,
         }))
     }
 
@@ -100,8 +101,13 @@ export default class Client {
         
     }
 
-    startGame(message : any){
-        console.log("TODO", message)
+    startGame(){
+        if (this.gameRoom && this.gameRoom.isHost(this)){
+            this.gameRoom.startGame();
+        }else{
+            console.log("ERREUR")
+        }
+
     }
 
     showTile(message: any) {

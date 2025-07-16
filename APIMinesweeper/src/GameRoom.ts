@@ -40,16 +40,10 @@ export default class GameRoom {
         if (this.players.length >= this.roomSize) {
             return false
         }
-        console.log(cli)
-        console.log("-----------")
-        console.log(cli.utilisateur)
-        console.log("-----------")
-        console.log(cli.utilisateur?.id)
-        console.log("-----------")
 
         this.sendtoallplayer({
             type : "NewPlayer",
-            idplayer : cli.utilisateur?.id
+            playerId : cli.utilisateur?.id
         })
 
         this.players.push(cli)
@@ -60,27 +54,37 @@ export default class GameRoom {
             height: this.getHeight(),
             width: this.getWidth(),
             nbBomb: this.getNbBomb(),
-            roomSize: this.getRoomSize()
+            roomSize: this.getRoomSize(),
+            playersId : this.getAllPlayersID()
         }))
 
         return true
     }
 
     startGame(): boolean {
-        if (this.players.length !== this.roomSize) {
-            return false
-        }
-        const idplayers = this.players.map((cli)=>{
-            return cli.utilisateur?.id
-        }) as number[]
+        // if (this.players.length !== this.roomSize) {
+        //     return false
+        // }
+
+        const idplayers = this.getAllPlayersID()
 
         this.game = new Game(null, this.gameHeight, this.gameWidth, this.gameNbBomb, idplayers)
+
+        this.sendtoallplayer({type : "StartGame"})
 
         return true
     }
 
     isHost(host: Client) {
         return host === this.host
+    }
+
+    getAllPlayersID() : number[]{
+        const idplayers = this.players.map((cli)=>{
+            return cli.utilisateur?.id
+        }) as number[];
+
+        return idplayers
     }
 
     ///
@@ -159,7 +163,6 @@ export default class GameRoom {
 
 
     sendtoallplayer(message: any) {
-        console.log(this.players)
         this.players.forEach((player: Client) => {
             player.socket.send(JSON.stringify(message))
         })
@@ -196,8 +199,6 @@ export default class GameRoom {
     }
 
     static GetGameRoom(roomID: number): GameRoom | null {
-        console.log("roomID",roomID);
-        console.log(GameRoom.GameRooms)
         const gameroom = GameRoom.GameRooms[roomID]
         return gameroom ? gameroom : null
     }

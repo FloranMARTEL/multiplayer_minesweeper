@@ -1,16 +1,27 @@
-import React from "react"
+import React, { JSX } from "react"
+
+import Button from "../Button"
+import ButtonImg from "../ButtonImg"
+import PlayerResum from "../PlayerResum"
+
+import "./styles.css"
 
 type MyState = {
     host: boolean
-    height: number | null,
-    width: number | null,
-    nbBomb: number | null,
-    roomId: number | null,
-    roomSize: number | null,
+
 }
 
 type MyProps = {
     host?: boolean,
+    startGame : () => void,
+    state: null | { // déplacer se si dans le game manager
+        height: number,
+        width: number,
+        nbBomb: number,
+        roomId: number,
+        roomSize: number
+    },
+    players : {name : string, flag: string}[]
 }
 
 export default class Room extends React.Component<MyProps, MyState> {
@@ -18,29 +29,17 @@ export default class Room extends React.Component<MyProps, MyState> {
     constructor(props: MyProps) {
         super(props)
 
-        const tempstate = {
-            height: null,
-            width: null,
-            nbBomb: null,
-            roomId: null,
-            roomSize: null
-        }
-
         if (this.props.host) {
-            this.state = { host: true, ...tempstate }
+            this.state = { host: true}
         } else {
-            this.state = { host: false, ...tempstate }
+            this.state = { host: false}
         }
 
 
     }
 
-    setGameStatus(height: number, width: number, nbBomb: number, roomId: number, roomSize: number) {
-        this.setState({ height: height, width: width, nbBomb: nbBomb, roomId: roomId, roomSize: roomSize })
-    }
-
-    updateplayerlist(idPlayers : number[]){
-        console.log("todo",idPlayers)
+    updateplayerlist(idPlayers: number[]) {
+        console.log("todo", idPlayers)
     }
 
     startGame() {
@@ -49,36 +48,59 @@ export default class Room extends React.Component<MyProps, MyState> {
 
     render() {
 
+        const title = this.state.host ? "Create Room" : "Join Room";
 
         let startGameButton = null
 
         if (this.state.host) {
-            startGameButton = <button onClick={() => this.startGame()}>Start Game</button>
+            startGameButton = <Button onClick={()=>this.props.startGame()} text="Start" />
         }
 
-        let gamestatus = null
-        if (this.state.height !== null) {
-            gamestatus =
-                <div>
-                    <span>Height {this.state.height}</span>
-                    <span>Width {this.state.width}</span>
-                    <span>nbBomb {this.state.nbBomb}</span>
-                    <span>roomId {this.state.roomId}</span>
-                    <span>roomSize {this.state.roomSize}</span>
+        const gamestatusbox =
+            (this.props.state !== null) ?
+
+                <div className="boxIn stateRoom">
+                    <div>
+                        <span>Height : {this.props.state.height}</span>
+                        <span>Width : {this.props.state.width}</span>
+                        <span>Bomb : {this.props.state.nbBomb}</span>
+                        <span>
+                            <img src="/icon/smile.png" alt="smile" />
+                             2/{this.props.state.roomSize}
+                        </span>
+
+                    </div>
+                    <div>
+                        <span>roomId : {this.props.state.roomId}</span>
+
+                    </div>
                 </div>
-        }
+                : <div className="boxIn"></div>
+        
+
+        const playerbox : JSX.Element[] = []
+        let i = 0
+        this.props.players.forEach((player)=>{
+            playerbox.push(<PlayerResum key={++i} photo={"/test.jpg"} name={player.name} flag={"/flag/fr.png"} />)
+        })
 
         return (
-            <div>
-                {gamestatus}
-                <section>
-                    <div>
-                        player
-                    </div>
-                </section>
 
+            <div className="boxOut roomBox">
+                <div className="boxIn"><h2>{title}</h2></div>
+                <div className="stateBox">
+                {gamestatusbox}
+                <ButtonImg onClick={()=>(console.log("Todo"))} src="/icon/engrenage.png" alt="engrenage"/>
+                </div>
+
+                <div className="boxIn playerResumBox">
+                    {playerbox}
+                </div>
                 {startGameButton}
+
             </div>
+
+
         )
     }
 

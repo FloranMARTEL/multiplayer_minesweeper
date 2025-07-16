@@ -49,16 +49,25 @@ span,h2,h1,h3,p,button{
 }
 
 
+main{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 
-main {
+  margin: 10% 10%;
+  gap: 30px;
+
+}
+
+main > div:first-child {
   display: flex;
   flex-direction: column;
 
   justify-content: center;
+  flex-grow: 1;
 
   height: 100%;
 
-  margin: 10% 10%;
   gap: 25px;
 
 }

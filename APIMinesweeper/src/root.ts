@@ -11,6 +11,31 @@ import UtilisateurAnonyme from './model/UtilisateurAnonyme.js';
 import { randomUUID } from 'crypto';
 
 
+router.get('/test', (req : Request, res : Response) => {
+    res.status(200).json('{test: "ok"}');
+});
+
+router.get("/player/:id", (req : Request, res : Response) => {
+
+    const id = Number(req.params.id)
+
+    
+
+    const player = (id===-1)?
+    {
+        name : "user1",
+        flag : "fr"
+    }:
+    {
+        name : "user2",
+        flag : "fr"
+    }
+        
+    
+
+    res.status(200).json(player);
+});
+
 router.post('/connection',(req : Request, res : Response)=>{
     const email = req.body.email
     const mdp = req.body.mdp
@@ -28,9 +53,6 @@ router.post('/connection',(req : Request, res : Response)=>{
 
 })
 
-router.get('/test', (req : Request, res : Response) => {
-    res.status(200).json('{test: "ok"}');
-});
 
 
 export default router
