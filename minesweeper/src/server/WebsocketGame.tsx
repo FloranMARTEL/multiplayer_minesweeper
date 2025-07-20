@@ -1,4 +1,3 @@
-import { json } from "stream/consumers";
 import ApiMinesweeper from "./ApiMinesweeper";
 
 export default class WebsocketGame {
@@ -9,10 +8,11 @@ export default class WebsocketGame {
     constructor(roomId : number | null,
         setGameStatus: (height: number, width: number, nbBomb: number, roomId: number, roomSize : number) => void,
         updateTiles: (tiles: { [key: number]: number }) => void,
-        setflag: (row: number, col: number) => void,
-        remouveflag: (row: number, col: number) => void,
-        setPlayersList: ( players : {name : string, flag: string}[] ) => void,
-        addPlayer: (player : {name : string, flag: string}) => void,
+        addCptTiles: (userId : number, nbTiles : number) => void,
+        setFlag: (row: number, col: number) => void,
+        remouveFlag: (row: number, col: number) => void,
+        setPlayersList: ( players : { [key : number]: { name: string, flag: string }} ) => void,
+        addPlayer: (playerId : number, player: { name: string; flag: string; }) => void,
         initGameBoard: () => void
     ) {
         console.log("creaction websocket")
@@ -36,7 +36,7 @@ export default class WebsocketGame {
                 
                 ApiMinesweeper.GetPlayerResumByID(jsonmessage.hostId)
                 .then((player)=>{
-                    addPlayer(player)
+                    addPlayer(jsonmessage.hostId,player)
                 })
 
             }else if (jsonmessage.type === "JoinGame") {
@@ -44,35 +44,43 @@ export default class WebsocketGame {
                 
                 //set player list
                 const playersId = jsonmessage.playersId as number[];
+                let players : { [key : number]: { name: string, flag: string }} = {}
+
                 Promise.all(playersId.map(async (playerId : number) => {
-                    return await ApiMinesweeper.GetPlayerResumByID(playerId)
-                })).then((players)=>{
+                    const player = await ApiMinesweeper.GetPlayerResumByID(playerId)
+                    players[playerId] = player
+                })).then(()=>{
                     setPlayersList(players)
                 })
                 
             }else if (jsonmessage.type === "NewPlayer"){
-
-                ApiMinesweeper.GetPlayerResumByID(jsonmessage.playerId)
+                const playerId = jsonmessage.playerId as number
+                ApiMinesweeper.GetPlayerResumByID(playerId)
                 .then((player)=>{
-                    addPlayer(player)
+                    addPlayer(playerId,player)
                 })
 
             }else if (jsonmessage.type === "StartGame"){
                 initGameBoard()
             
             }else if (jsonmessage.type === "ShowCell") {
+                // updateTile
                 const tiles = jsonmessage.tiles as { [key: number]: number }
                 updateTiles(tiles)
 
+                //update compteur tiles
+                const nbTiles = jsonmessage.nbTiles as number
+                const userid = jsonmessage.user as number
+                addCptTiles(userid,nbTiles)
             }
             else if (jsonmessage.type === "Flag") {
                 const action = jsonmessage.action
                 const row = jsonmessage.row
                 const col = jsonmessage.col
                 if (action === "set") {
-                    setflag(row, col)
+                    setFlag(row, col)
                 } else if (action === "remouve") {
-                    remouveflag(row, col)
+                    remouveFlag(row, col)
                 }
                 this.client.onclose = () => {
                     console.log("connection closed")

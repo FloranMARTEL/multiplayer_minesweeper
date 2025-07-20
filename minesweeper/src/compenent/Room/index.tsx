@@ -21,7 +21,7 @@ type MyProps = {
         roomId: number,
         roomSize: number
     },
-    players : {name : string, flag: string}[]
+    players : { [key : number]: { name: string, flag: string }}
 }
 
 export default class Room extends React.Component<MyProps, MyState> {
@@ -66,7 +66,7 @@ export default class Room extends React.Component<MyProps, MyState> {
                         <span>Bomb : {this.props.state.nbBomb}</span>
                         <span>
                             <img src="/icon/smile.png" alt="smile" />
-                             {this.props.players.length}/{this.props.state.roomSize}
+                             {Object.keys(this.props.players).length}/{this.props.state.roomSize}
                         </span>
 
                     </div>
@@ -80,9 +80,11 @@ export default class Room extends React.Component<MyProps, MyState> {
 
         const playerbox : JSX.Element[] = []
         let i = 0
-        this.props.players.forEach((player)=>{
+        for (const userId in this.props.players){
+            const player = this.props.players[userId]
             playerbox.push(<PlayerResum key={++i} photo={"/test.jpg"} name={player.name} flag={`/flag/${player.flag}.png`} />)
-        })
+        }
+
 
         return (
 

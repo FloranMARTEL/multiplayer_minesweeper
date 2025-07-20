@@ -13,10 +13,7 @@ type State = {}
 type Props = {
 }
 export default class Home extends React.Component<Props, State> {
-    
-    constructor(props : Props){
-        super(props);
-    }
+
 
     render(){
         return(
@@ -27,8 +24,6 @@ export default class Home extends React.Component<Props, State> {
                 </div>
                 <UserResum/>
                 
-                {/* <button onClick={()=>{this.props.navigate("/game/createRoom")}}>Crée une partie</button>
-                <button onClick={()=>{this.props.navigate("/game/joinRoom")}}>rejoindre une partie</button> */}
             </main>
         )
     }

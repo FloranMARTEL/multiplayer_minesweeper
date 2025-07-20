@@ -8,7 +8,8 @@ type MyState = {
 type MyProps = {
     photo: string,
     name: string,
-    flag: string
+    flag: string,
+    nbTiles : number
 }
 
 export default class PlayerResumState extends React.Component<MyProps, MyState> {
@@ -31,7 +32,7 @@ export default class PlayerResumState extends React.Component<MyProps, MyState> 
                     </div>
                     <div>
                         <span>Discovery Tiles</span>
-                        <span>0</span>
+                        <span>{this.props.nbTiles}</span>
                     </div>
                 </div>
 

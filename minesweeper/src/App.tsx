@@ -14,7 +14,7 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Home />} />
-        <Route path="/game/:path" element={<GameManagerWrapper />} />
+        <Route path="/game/:path/:roomId?" element={<GameManagerWrapper />} />
 
       </Routes>
 

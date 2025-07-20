@@ -96,7 +96,7 @@ export default class GameRoom {
             return
         }
 
-        const tiles = this.game.discoverTileWithRowAndCol(row, col)
+        const {tiles,nbTiles} = this.game.discoverTileWithRowAndCol(row, col,user.id)
 
         if (this.game.getGameStatus() === GameStatus.Over) {
 
@@ -110,13 +110,15 @@ export default class GameRoom {
             this.closeConnection()
         }
         else {
-            const tilesmaped = Object.fromEntries(
-                Object.entries(tiles).map(([k, t]) => [k, t.getValue()])
-            );
+            const tilesmaped : {[key : number] : number}= {}
+            for (const key in tiles){
+                tilesmaped[key] = tiles[key].getValue()
+            }
 
             this.sendtoallplayer({
                 type: "ShowCell",
                 tiles: tilesmaped,
+                nbTiles : nbTiles,
                 user: user.id
             })
         }

@@ -17,7 +17,7 @@ export default class Game {
     private discoveredTiles: Set<Tile>
 
     private flags: { [key : number] : Set<number>}
-
+    private cptTileDiscoverd: { [key : number] : number}
 
     constructor(seed: number | null, height: number, width: number, nbBomb: number, idplayers : number[]) {
         this.board = new Board(seed, height, width, nbBomb)
@@ -25,21 +25,22 @@ export default class Game {
         this.discoveredTiles = new Set()
 
         this.flags = {}
+        this.cptTileDiscoverd = {}
         idplayers.forEach((idplayer)=>{
             this.flags[idplayer] = new Set<number>()
+            this.cptTileDiscoverd[idplayer] = 0
         })
-
     }
 
-    discoverTileWithIndex(index: number): { [key: number]: SafeTile } {
+    discoverTileWithIndex(index: number,numplayer : number): {tiles : { [key: number]: SafeTile }, nbTiles : number} {
         const startTile: Tile = this.board.getTileWithIndex(index);
         if (this.discoveredTiles.has(startTile)) {
-            return {};
+            return {tiles :{}, nbTiles :0};
         }
 
         if (!startTile.discover()) {
             this.gameStatus = GameStatus.Over
-            return {}
+            return {tiles :{}, nbTiles :0};
         }
 
         this.discoveredTiles.add(startTile);
@@ -79,12 +80,15 @@ export default class Game {
             }
         }
 
-        return tilesFound;
+        const nbTiles = Object.keys(tilesFound).length
+        this.cptTileDiscoverd[numplayer] += nbTiles
+
+        return {tiles : tilesFound, nbTiles : nbTiles};
     }
 
-    discoverTileWithRowAndCol(row: number, col: number): { [key: number]: SafeTile } {
+    discoverTileWithRowAndCol(row: number, col: number, numplayer : number): {tiles : { [key: number]: SafeTile }, nbTiles : number} {
         const index = row * this.board.width + col
-        return this.discoverTileWithIndex(index);
+        return this.discoverTileWithIndex(index, numplayer);
     }
 
     placeFlagWithRowAndCol(row: number, col: number, idplayer: number) {

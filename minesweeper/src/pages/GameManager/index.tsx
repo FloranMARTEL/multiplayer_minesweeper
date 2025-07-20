@@ -1,5 +1,4 @@
-import path from "path";
-import React,{JSX} from "react";
+import React from "react";
 
 import { useParams, useNavigate, useLocation, NavigateFunction, Location, Params } from 'react-router-dom';
 
@@ -34,7 +33,7 @@ type MyState = {
         roomId: number,
         roomSize: number
     },
-    players: { name: string, flag: string }[]
+    players: { [key : number]: { name: string, flag: string }}
 }
 type MyProps = {
     params: Readonly<Params<string>>;
@@ -53,6 +52,7 @@ class GameManager extends React.Component<MyProps, MyState> {
     client: WebsocketGame;
     roomRef: React.RefObject<Room | null>;
     boardRef: React.RefObject<Board | null>;
+    playerListGameRef: React.RefObject<PlayersListGame | null>;
 
 
     constructor(props: MyProps) {
@@ -60,6 +60,7 @@ class GameManager extends React.Component<MyProps, MyState> {
 
         this.setGameStatus = this.setGameStatus.bind(this);
         this.updateTiles = this.updateTiles.bind(this);
+        this.addCptTiles = this.addCptTiles.bind(this);
         this.setFlag = this.setFlag.bind(this);
         this.remouveFlag = this.remouveFlag.bind(this);
         this.setPlayersList = this.setPlayersList.bind(this);
@@ -75,6 +76,7 @@ class GameManager extends React.Component<MyProps, MyState> {
 
         this.roomRef = React.createRef<Room>();
         this.boardRef = React.createRef<Board>();
+        this.playerListGameRef = React.createRef<PlayersListGame>();
 
         if (props.params.path === undefined ||
             !Object.values(GameManagerPath).includes(props.params.path as GameManagerPath)
@@ -85,20 +87,22 @@ class GameManager extends React.Component<MyProps, MyState> {
 
         this.state = {
             state: null,
-            players: []
+            players: {}
         }
 
 
         //
         let roomid = null
         if (this.props.params.path as GameManagerPath === GameManagerPath.JoinRoom) {
-            roomid = 1;
+            
+            roomid = Number(this.props.params.roomId);
         }
         //
 
         this.client = new WebsocketGame(roomid,
             this.setGameStatus,
             this.updateTiles,
+            this.addCptTiles,
             this.setFlag,
             this.remouveFlag,
             this.setPlayersList,
@@ -125,6 +129,12 @@ class GameManager extends React.Component<MyProps, MyState> {
         }
     }
 
+    addCptTiles(userId : number, nbTiles : number){
+        if(this.playerListGameRef.current){
+            this.playerListGameRef.current.addCptTiles(userId,nbTiles)
+        }
+    }
+
     setFlag(row: number, col: number) {
         if (this.boardRef.current){
             this.boardRef.current.setFlag(row,col)
@@ -136,12 +146,12 @@ class GameManager extends React.Component<MyProps, MyState> {
         }
     }
 
-    setPlayersList(players: { name: string, flag: string }[]) {
+    setPlayersList(players: { [key : number]: { name: string, flag: string }}) {
         this.setState({ players: players })
     }
 
-    addPlayer(player: { name: string; flag: string; }) {
-        this.setState({ players: [...this.state.players, player] })
+    addPlayer(playerId : number, player: { name: string; flag: string; }) {
+        this.setState({ players: {[playerId] : player, ...this.state.players} })
     }
 
     sendStartGame() {
@@ -212,7 +222,7 @@ class GameManager extends React.Component<MyProps, MyState> {
                 page = 
                 <main>
                     {compenent}
-                    <PlayersListGame players={this.state.players}/>
+                    <PlayersListGame players={this.state.players} ref={this.playerListGameRef}/>
                 </main>
 
                 
