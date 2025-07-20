@@ -1,16 +1,16 @@
 import path from "path";
-import React from "react";
+import React,{JSX} from "react";
 
 import { useParams, useNavigate, useLocation, NavigateFunction, Location, Params } from 'react-router-dom';
+
 
 
 import Board from "../../compenent/Board";
 import Room from "../../compenent/Room";
 import WebsocketGame from "../../server/WebsocketGame";
-import { NumericLiteral } from "typescript";
 import ButtonSmal from "../../compenent/ButtonSmal";
 import UserResum from "../../compenent/UserResum";
-
+import PlayersListGame from "../../compenent/PlayersListGame";
 
 export default function GameManagerWrapper() {
     const params = useParams();
@@ -34,7 +34,7 @@ type MyState = {
         roomId: number,
         roomSize: number
     },
-    players : {name : string, flag: string}[]
+    players: { name: string, flag: string }[]
 }
 type MyProps = {
     params: Readonly<Params<string>>;
@@ -84,8 +84,8 @@ class GameManager extends React.Component<MyProps, MyState> {
         }
 
         this.state = {
-            state : null,
-            players : []
+            state: null,
+            players: []
         }
 
 
@@ -120,41 +120,47 @@ class GameManager extends React.Component<MyProps, MyState> {
     }
 
     updateTiles(tiles: { [key: number]: number }) {
-        console.log("TODO updateTiles")
+        if(this.boardRef.current){
+            this.boardRef.current.updateTiles(tiles)
+        }
     }
 
     setFlag(row: number, col: number) {
-        console.log("todo")
+        if (this.boardRef.current){
+            this.boardRef.current.setFlag(row,col)
+        }
     }
     remouveFlag(row: number, col: number) {
-        console.log("todo")
+        if (this.boardRef.current){
+            this.boardRef.current.remouveflag(row,col)
+        }
     }
 
-    setPlayersList(players : {name : string, flag: string}[]){
-        this.setState({players : players})
+    setPlayersList(players: { name: string, flag: string }[]) {
+        this.setState({ players: players })
     }
 
     addPlayer(player: { name: string; flag: string; }) {
-        this.setState({players : [...this.state.players,player]})
+        this.setState({ players: [...this.state.players, player] })
     }
 
-    sendStartGame(){
+    sendStartGame() {
         this.client.sendStartGame()
     }
 
-    sendDiscoverTile(r: number, c: number){
-        this.client.sendDiscoverTile(r,c)
+    sendDiscoverTile(r: number, c: number) {
+        this.client.sendDiscoverTile(r, c)
     }
 
-    sendSetFlag(r: number, c: number){
-        this.client.sendSetFlag(r,c)
+    sendSetFlag(r: number, c: number) {
+        this.client.sendSetFlag(r, c)
     }
 
-    sendRemouveFlag(r: number, c: number){
-        this.client.sendDiscoverTile(r,c)
+    sendRemouveFlag(r: number, c: number) {
+        this.client.sendRemouveFlag(r, c)
     }
 
-    initGameBoard(){
+    initGameBoard() {
         this.props.navigate("/game/inGame")
     }
 
@@ -168,36 +174,54 @@ class GameManager extends React.Component<MyProps, MyState> {
         const path = this.props.params.path as GameManagerPath
 
         let compenent = null
+        let page : React.ReactNode = <div></div>
 
-        switch (path) {
+        switch (path) { // TODO faire en sorte que la room prend en change le cas host et non host
             case GameManagerPath.CreateRoom:
                 compenent = <Room ref={this.roomRef} host={true} startGame={this.sendStartGame} state={this.state.state} players={this.state.players}></Room>
+
+                page = <main>
+                            <div>
+                                {compenent}
+                                <ButtonSmal onClick={() => console.log("test")} text="leave" />
+                            </div>
+                            <UserResum />
+                        </main>
                 break
             case GameManagerPath.JoinRoom:
                 compenent = <Room ref={this.roomRef} startGame={this.sendStartGame} state={this.state.state} players={this.state.players}></Room>
+                page = <main>
+                            <div>
+                                {compenent}
+                                <ButtonSmal onClick={() => console.log("test")} text="leave" />
+                            </div>
+                            <UserResum />
+                        </main>
                 break
             case GameManagerPath.InGame:
-                if (this.state.state !== null){
+                if (this.state.state !== null) {
                     compenent = <Board ref={this.boardRef}
-                                        height={this.state.state.height} 
-                                        width={this.state.state.width}
-                                        nbBomb={this.state.state.nbBomb}
-                                        sendDiscoverTile={this.sendDiscoverTile}
-                                        sendRemouveFlag={this.sendRemouveFlag}
-                                        sendSetFlag={this.sendSetFlag}/>
+                        height={this.state.state.height}
+                        width={this.state.state.width}
+                        nbBomb={this.state.state.nbBomb}
+                        sendDiscoverTile={this.sendDiscoverTile}
+                        sendRemouveFlag={this.sendRemouveFlag}
+                        sendSetFlag={this.sendSetFlag} />
                 }
+                console.log("players : ",this.state.players)
+                page = 
+                <main>
+                    {compenent}
+                    <PlayersListGame players={this.state.players}/>
+                </main>
+
+                
 
         }
 
 
         return (
-            <main>
-                <div>
-                    {compenent}
-                    <ButtonSmal onClick={() => console.log("test")} text="leave" />
-                </div>
-                <UserResum />
-            </main>
+            page
         )
     }
 

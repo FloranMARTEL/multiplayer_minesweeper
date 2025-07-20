@@ -23,7 +23,7 @@ enum Typeclick {
   right = 2,
 };
 
-export default class Cell extends React.Component<MyProps, MyState> {
+export default class Tile extends React.Component<MyProps, MyState> {
 
 
     constructor(props: MyProps) {
@@ -43,6 +43,7 @@ export default class Cell extends React.Component<MyProps, MyState> {
     }
 
     leftClick(){
+        console.log("clickDroit")
         if (this.state.status === TypeTile.Hide){
             this.props.sendDiscoverTile()
         }
@@ -63,14 +64,14 @@ export default class Cell extends React.Component<MyProps, MyState> {
 
 
     render(): React.ReactNode {
-        const path_img = "cellfont/default/";
+        const path_img = "/tileFont/default/tile/";
         let img = null
         let classname = "";
         let src = null
 
 
         if (this.state.status === TypeTile.Show){
-            classname = "show";
+            classname += "show";
             if (this.state.value != null &&
                 this.state.value > 0){
                     src = path_img + this.state.value.toString() + ".png"

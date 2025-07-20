@@ -2,7 +2,9 @@ import React, { JSX } from "react";
 
 import "./styles.css";
 
-import Cell from "../Cell";
+import Tile from "../Tile";
+
+import ButtonImg from "../ButtonImg";
 
 type MyState = {}
 type MyProps = {
@@ -16,7 +18,7 @@ type MyProps = {
 
 export default class Board extends React.Component<MyProps, MyState> {
 
-    tiles : React.RefObject<Cell | null>[][]
+    tiles: React.RefObject<Tile | null>[][]
 
     constructor(props: MyProps) {
         super(props);
@@ -26,7 +28,7 @@ export default class Board extends React.Component<MyProps, MyState> {
         for (let l = 0; l < this.props.height; l++) {
             this.tiles.push([])
             for (let c = 0; c < this.props.width; c++) {
-                this.tiles[l].push(React.createRef<Cell>())
+                this.tiles[l].push(React.createRef<Tile>())
             }
         }
     }
@@ -34,28 +36,28 @@ export default class Board extends React.Component<MyProps, MyState> {
     updateTiles(tilesdict: { [key: number]: number }) {
         for (const indextile in tilesdict) {
             const indexTileNumber = Number(indextile)
-            const row = Math.floor(indexTileNumber/this.props.width)
-            const col = indexTileNumber%this.props.width
+            const row = Math.floor(indexTileNumber / this.props.width)
+            const col = indexTileNumber % this.props.width
             const tileref = this.tiles[row][col]
-            if (tileref.current){
+            if (tileref.current) {
                 tileref.current.updateValue(tilesdict[indextile])
             }
         }
     }
 
-    setflag(row:number, col : number){
+    setFlag(row: number, col: number) {
         const tileref = this.tiles[row][col]
-        
-        if (tileref.current){
+
+        if (tileref.current) {
             tileref.current.setFlag()
         }
     }
 
-    
-    remouveflag(row:number, col : number){
+
+    remouveflag(row: number, col: number) {
         const tileref = this.tiles[row][col]
-        
-        if (tileref.current){
+
+        if (tileref.current) {
             tileref.current.remouveFlag()
         }
     }
@@ -69,11 +71,11 @@ export default class Board extends React.Component<MyProps, MyState> {
 
             for (let c = 0; c < this.props.width; c++) {
                 columne.push(
-                    <Cell ref={this.tiles[l][c]}
-                    key={c}
-                    sendDiscoverTile={() => this.props.sendDiscoverTile(l, c)}
-                    sendSetFlag={()=> this.props.sendSetFlag(l,c)}
-                    sendRemouveFlag={()=> this.props.sendRemouveFlag(l,c)}
+                    <Tile ref={this.tiles[l][c]}
+                        key={c}
+                        sendDiscoverTile={() => this.props.sendDiscoverTile(l, c)}
+                        sendSetFlag={() => this.props.sendSetFlag(l, c)}
+                        sendRemouveFlag={() => this.props.sendRemouveFlag(l, c)}
                     />
                 );
             }
@@ -87,8 +89,23 @@ export default class Board extends React.Component<MyProps, MyState> {
 
 
         return (
-            <div className="board">
-                {rows}
+            <div className="boxOut">
+                <div className="boxIn headBoard">
+                    <div className="boxIn">
+                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                    </div>
+                    <ButtonImg src="/icon/smileYellow.png" alt="smile yellow" onClick={()=>console.log("TODO")}/>
+                    <div className="boxIn">
+                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                    </div>
+                </div>
+                <div className="boxIn board">
+                    {rows}
+                </div>
             </div>
         );
 

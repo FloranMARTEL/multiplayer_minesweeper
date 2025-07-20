@@ -100,12 +100,12 @@ export default class GameRoom {
 
         if (this.game.getGameStatus() === GameStatus.Over) {
 
-            this.sendtoallplayer(JSON.stringify({
+            this.sendtoallplayer({
                 type: "GameOver",
                 user: user.id,
                 row : row,
                 col : col
-            }))
+            })
 
             this.closeConnection()
         }
@@ -114,12 +114,11 @@ export default class GameRoom {
                 Object.entries(tiles).map(([k, t]) => [k, t.getValue()])
             );
 
-            this.sendtoallplayer(JSON.stringify({
+            this.sendtoallplayer({
                 type: "ShowCell",
                 tiles: tilesmaped,
-                user: user.id,
-                gamestatus: this.game.getGameStatus()
-            }))
+                user: user.id
+            })
         }
     }
 
@@ -133,13 +132,13 @@ export default class GameRoom {
 
         this.game.placeFlagWithRowAndCol(row, col, user.id)
 
-        this.sendtoallplayer(JSON.stringify({
+        this.sendtoallplayer({
             type: "Flag",
             action: "set",
             user : user.id,
             row: row,
             col: col
-        }))
+        })
     }
 
 
@@ -151,13 +150,13 @@ export default class GameRoom {
         }
 
         this.game.RemouveFlagWithRowAndCol(row, col,user.id)
-            this.sendtoallplayer(JSON.stringify({
+            this.sendtoallplayer({
                 type: "Flag",
                 action: "remouve",
                 user:user.id,
                 row: row,
                 col: col
-            }))
+            })
     }
     ///
 

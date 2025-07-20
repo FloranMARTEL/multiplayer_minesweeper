@@ -1,8 +1,57 @@
 
+
+.headBoard{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 6px 12px 8px 10px;
+    align-items: center;
+}
+
+.headBoard > div{
+    padding: 0 2px 2px 0;
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+
+    background-color: black;
+    padding: 2px 6px 6px 2px;
+    gap: 2px;
+}
+
+.headBoard > div > img{
+    height: 47px;
+}
+
+.headBoard button{
+    padding: 4px 6px 6px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: min-content;
+}
+
+.headBoard button > img{
+    width: 34px;
+    height: 34px;
+}
+
+
+
+
+
+
+
+
+/* BOARD */
 .board{
     display: flex;
     flex-direction: column;
     padding: 10px;
+
+    width: min-content;
+    align-self: center;
 }
 
 .board > div{
@@ -11,8 +60,14 @@
 }
 
 .board > div > div{
-    background-color: grey;
-    border: 1px solid black;
+    border-top: 4px solid var(--greyLime);
+    border-left: 4px solid var(--greyLime);
+
+    border-bottom: 4px solid var(--greyDark);
+    border-right: 4px solid var(--greyDark);
+
+    background-color: var(--grey);
+
     width: 20px;
     height: 20px;
 
@@ -27,7 +82,16 @@
     image-rendering: pixelated
 }
 
+/* alors il faut mettre une
+bordure de 1 par tout sauf pour
+les bord ou il faut mettre une bordure de 2 */
+.board > div > div.show{ 
+    border: 0;
+    border-top: 2px solid var(--greyDark);
+    border-left: 2px solid var(--greyDark);
 
-.board > div > div.show{
-    background-color: rgb(255, 255, 255);
+    padding-top : 2px;
+    padding-left : 2px;
+    padding-bottom : 4px;
+    padding-right: 4px;
 }

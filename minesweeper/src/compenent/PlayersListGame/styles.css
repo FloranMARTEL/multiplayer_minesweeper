@@ -1,0 +1,47 @@
+.playerListBox{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.playerListBox > div:last-child{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.playerListBox > div:last-child > div{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.playerResumStat >img{
+    width: 50px;
+    height: 50px;
+    padding: 0 4px 4px 0;
+}
+
+.playerResumStat >div{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+}
+
+
+.playerResumStat >div > div:first-child{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    align-items: center;
+
+}
+
+.playerResumStat >div > div:last-child{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
