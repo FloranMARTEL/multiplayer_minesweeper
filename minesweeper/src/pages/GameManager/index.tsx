@@ -59,12 +59,14 @@ class GameManager extends React.Component<MyProps, MyState> {
         super(props)
 
         this.setGameStatus = this.setGameStatus.bind(this);
+        this.updateGameStatus = this.updateGameStatus.bind(this);
         this.updateTiles = this.updateTiles.bind(this);
         this.addCptTiles = this.addCptTiles.bind(this);
         this.setFlag = this.setFlag.bind(this);
         this.remouveFlag = this.remouveFlag.bind(this);
         this.setPlayersList = this.setPlayersList.bind(this);
         this.addPlayer = this.addPlayer.bind(this);
+        this.sendUpdateStateGame = this.sendUpdateStateGame.bind(this);
 
         this.sendStartGame = this.sendStartGame.bind(this)
         this.initGameBoard = this.initGameBoard.bind(this)
@@ -101,6 +103,7 @@ class GameManager extends React.Component<MyProps, MyState> {
 
         this.client = new WebsocketGame(roomid,
             this.setGameStatus,
+            this.updateGameStatus,
             this.updateTiles,
             this.addCptTiles,
             this.setFlag,
@@ -117,10 +120,11 @@ class GameManager extends React.Component<MyProps, MyState> {
         this.setState({ state: { height: height, width: width, nbBomb: nbBomb, roomId: roomId, roomSize: roomSize } })
     }
 
-    updateplayerlist(idPlayers: number[]) {
-        if (this.roomRef.current) {
-            this.roomRef.current.updateplayerlist(idPlayers)
+    updateGameStatus(height: number, width: number, nbBomb: number, roomSize: number) {
+        if (this.state.state === null){
+            return
         }
+        this.setState({ state: { height: height, width: width, nbBomb: nbBomb, roomId: this.state.state.roomId, roomSize: roomSize } })
     }
 
     updateTiles(tiles: { [key: number]: number }) {
@@ -170,6 +174,11 @@ class GameManager extends React.Component<MyProps, MyState> {
         this.client.sendRemouveFlag(r, c)
     }
 
+    sendUpdateStateGame(height : number, width : number, nbBomb : number, roomSize : number){
+        this.client.sendUpdateStateGame(height, width, nbBomb, roomSize)
+    }
+
+
     initGameBoard() {
         this.props.navigate("/game/inGame")
     }
@@ -188,8 +197,9 @@ class GameManager extends React.Component<MyProps, MyState> {
 
         switch (path) { // TODO faire en sorte que la room prend en change le cas host et non host
             case GameManagerPath.CreateRoom:
-                compenent = <Room ref={this.roomRef} host={true} startGame={this.sendStartGame} state={this.state.state} players={this.state.players}></Room>
 
+
+                compenent = <Room ref={this.roomRef} host={true} sendUpdateStateGame={this.sendUpdateStateGame} startGame={this.sendStartGame} state={this.state.state} players={this.state.players}/>
                 page = <main>
                             <div>
                                 {compenent}

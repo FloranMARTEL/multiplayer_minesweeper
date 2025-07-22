@@ -44,7 +44,7 @@ h2 {
   margin: 0px;
 }
 
-span,h2,h1,h3,p,button{
+span,h2,h1,h3,p,button,input{
   font-family: "Pixelif";
 }
 
@@ -95,16 +95,17 @@ main > div:first-child {
   padding: 24px;
 }
 
+/* input text */
 
-/* temp */
+input{
+  background-color: var(--grey);
+  border-top: 4px solid var(--greyDark);
+  border-left: 4px solid var(--greyDark);
+  border-right: 4px solid var(--greyLime);
+  border-bottom: 4px solid var(--greyLime);
+}
 
-/* .cell {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(to bottom, #c0c0c0, #a0a0a0); 
-  border-top: 2px solid #ffffff; 
-  border-left: 2px solid #ffffff; 
-  border-bottom: 2px solid #404040; 
-  border-right: 2px solid #404040; 
-  box-sizing: border-box;
-} */
+input:focus {
+  outline: none;
+  box-shadow: none;
+}

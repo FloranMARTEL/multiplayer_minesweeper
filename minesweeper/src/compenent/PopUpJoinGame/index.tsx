@@ -26,7 +26,7 @@ export default class PopUpJoinGame extends React.Component<MyProps, MyState> {
         if (this.inputRef.current){
             const inputValue = this.inputRef.current.value
             const inputValueInt = parseInt(inputValue)
-            this.props.navigate("/game/joinRoom/"+inputValue)
+            this.props.navigate("/game/joinRoom/"+inputValueInt)
         }
 
     }
@@ -39,7 +39,7 @@ export default class PopUpJoinGame extends React.Component<MyProps, MyState> {
                 <div className='boxIn'><h2>Join Game</h2></div>
                 <div>
                     <label htmlFor="roomId"><h2>Room ID</h2></label>
-                    <input type="numberici" name="roomId" id="roomId" ref={this.inputRef}/>
+                    <input type="number" name="roomId" id="roomId" autoComplete="off" ref={this.inputRef}/>
                     <ButtonSmal onClick={()=>{this.onjoinGameClick()}} text="Join Game" />    
                 </div>
                 <ButtonSmal onClick={this.props.onLeaveClick} text="leave" />

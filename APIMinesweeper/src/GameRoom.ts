@@ -87,6 +87,21 @@ export default class GameRoom {
         return idplayers
     }
 
+    updateStateGame(height : number, width : number, nbBomb : number, roomSize : number){
+        this.gameHeight = height
+        this.gameWidth = width
+        this.gameNbBomb = nbBomb
+        this.roomSize = roomSize
+
+        this.sendtoallplayer({
+            type : "UpdateStateGame",
+            height : this.getHeight(),
+            width : this.getWidth(),
+            nbBomb : this.getNbBomb(),
+            roomSize : this.getRoomSize()
+        })
+    }
+
     ///
 
     discoverTile(user: Utilisateur, row: number, col: number) {
@@ -175,13 +190,9 @@ export default class GameRoom {
         })
     }
 
-
-
-
     getRoomID() {
         return this.roomID
     }
-
     getHeight() {
         return this.gameHeight
     }

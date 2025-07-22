@@ -27,6 +27,8 @@ export default class Client {
             }
             else if (message.type === "JoinGame"){
                 this.joinGame(message)
+            }else if (message.type === "UpdateStateGame"){
+                this.updateStateGame(message)
             }
             else if (message.type === "StartGame"){
                 this.startGame()
@@ -99,6 +101,12 @@ export default class Client {
 
         this.gameRoom.joinGameRoom(this) //check si la parti est plenne
         
+    }
+
+    updateStateGame(message:any){
+        if (this.gameRoom && this.gameRoom.isHost(this)){
+            this.gameRoom.updateStateGame(message.height,message.width,message.nbBomb,message.roomSize)
+        }
     }
 
     startGame(){

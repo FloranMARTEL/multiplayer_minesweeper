@@ -7,6 +7,7 @@ export default class WebsocketGame {
     //if roomID = null send create game
     constructor(roomId : number | null,
         setGameStatus: (height: number, width: number, nbBomb: number, roomId: number, roomSize : number) => void,
+        updateGameStatus: (height: number, width: number, nbBomb: number, roomSize : number) => void,
         updateTiles: (tiles: { [key: number]: number }) => void,
         addCptTiles: (userId : number, nbTiles : number) => void,
         setFlag: (row: number, col: number) => void,
@@ -60,7 +61,11 @@ export default class WebsocketGame {
                     addPlayer(playerId,player)
                 })
 
-            }else if (jsonmessage.type === "StartGame"){
+            }else if (jsonmessage.type === "UpdateStateGame"){
+                updateGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb,jsonmessage.roomSize)
+            }
+            
+            else if (jsonmessage.type === "StartGame"){
                 initGameBoard()
             
             }else if (jsonmessage.type === "ShowCell") {
@@ -110,6 +115,17 @@ export default class WebsocketGame {
             token: 1
         }))
     }
+
+    sendUpdateStateGame(height : number, width : number, nbBomb : number, roomSize : number){
+        this.client.send(JSON.stringify({
+            type : "UpdateStateGame",
+            width: width,
+            height: height,
+            nbBomb: nbBomb,
+            roomSize : roomSize,
+        }))
+    }
+    
 
 
     sendDiscoverTile(r: number, c: number) {

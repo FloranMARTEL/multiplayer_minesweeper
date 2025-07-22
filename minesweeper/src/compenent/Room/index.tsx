@@ -1,20 +1,22 @@
 import React, { JSX } from "react"
 
 import Button from "../Button"
-import ButtonImg from "../ButtonImg"
 import PlayerResum from "../PlayerResum"
+import StatePartySettings from "../StatePartySettings"
+import StatePartySettingsModifier from "../StatePartySettingsModifier"
 
 import "./styles.css"
 
 type MyState = {
     host: boolean
-
+    settings : boolean
 }
 
 type MyProps = {
     host?: boolean,
+    sendUpdateStateGame? : (height : number, width : number, nbBomb : number, roomSize : number) => void,
     startGame : () => void,
-    state: null | { // déplacer se si dans le game manager
+    state: null | {
         height: number,
         width: number,
         nbBomb: number,
@@ -30,20 +32,16 @@ export default class Room extends React.Component<MyProps, MyState> {
         super(props)
 
         if (this.props.host) {
-            this.state = { host: true}
+            this.state = { host: true, settings : false}
         } else {
-            this.state = { host: false}
+            this.state = { host: false, settings : false}
         }
 
 
     }
 
-    updateplayerlist(idPlayers: number[]) {
-        console.log("todo", idPlayers)
-    }
-
-    startGame() {
-        console.log("Start Game")
+    setStateSettings(settings : boolean){
+        this.setState({settings : settings})
     }
 
     render() {
@@ -56,26 +54,23 @@ export default class Room extends React.Component<MyProps, MyState> {
             startGameButton = <Button onClick={()=>this.props.startGame()} text="Start" />
         }
 
-        const gamestatusbox =
-            (this.props.state !== null) ?
+        const nbplayer = Object.keys(this.props.players).length 
+        const statebox = (this.props.state)?
+                            (this.state.settings && this.state.host && this.props.sendUpdateStateGame !== undefined)?
+                                <StatePartySettingsModifier
+                                    onClickCancel={() => this.setStateSettings(false)} 
+                                    sendUpdateStateGame={this.props.sendUpdateStateGame}
+                                    state={this.props.state}
+                                    nbPlayers={nbplayer}/>
+                                :
+                                <StatePartySettings host={this.state.host}
+                                onClickSettings={() => this.setStateSettings(true)}
+                                state={this.props.state}
+                                nbPlayers={nbplayer}/>
+                            :
+                            null
 
-                <div className="boxIn stateRoom">
-                    <div>
-                        <span>Height : {this.props.state.height}</span>
-                        <span>Width : {this.props.state.width}</span>
-                        <span>Bomb : {this.props.state.nbBomb}</span>
-                        <span>
-                            <img src="/icon/smile.png" alt="smile" />
-                             {Object.keys(this.props.players).length}/{this.props.state.roomSize}
-                        </span>
-
-                    </div>
-                    <div>
-                        <span>roomId : {this.props.state.roomId}</span>
-
-                    </div>
-                </div>
-                : <div className="boxIn"></div>
+    
         
 
         const playerbox : JSX.Element[] = []
@@ -90,10 +85,8 @@ export default class Room extends React.Component<MyProps, MyState> {
 
             <div className="boxOut roomBox">
                 <div className="boxIn"><h2>{title}</h2></div>
-                <div className="stateBox">
-                {gamestatusbox}
-                <ButtonImg onClick={()=>(console.log("Todo"))} src="/icon/engrenage.png" alt="engrenage"/>
-                </div>
+
+                {statebox}
 
                 <div className="boxIn playerResumBox">
                     {playerbox}
