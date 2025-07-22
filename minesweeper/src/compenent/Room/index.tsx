@@ -50,7 +50,7 @@ export default class Room extends React.Component<MyProps, MyState> {
 
         let startGameButton = null
 
-        if (this.state.host) {
+        if (this.state.host && this.state.settings === false) {
             startGameButton = <Button onClick={()=>this.props.startGame()} text="Start" />
         }
 

@@ -70,6 +70,7 @@ class GameManager extends React.Component<MyProps, MyState> {
 
         this.sendStartGame = this.sendStartGame.bind(this)
         this.initGameBoard = this.initGameBoard.bind(this)
+        this.gameOver = this.gameOver.bind(this)
 
         this.sendSetFlag = this.sendSetFlag.bind(this);
         this.sendRemouveFlag = this.sendRemouveFlag.bind(this);
@@ -111,6 +112,7 @@ class GameManager extends React.Component<MyProps, MyState> {
             this.setPlayersList,
             this.addPlayer,
             this.initGameBoard,
+            this.gameOver
         )
 
 
@@ -130,6 +132,12 @@ class GameManager extends React.Component<MyProps, MyState> {
     updateTiles(tiles: { [key: number]: number }) {
         if(this.boardRef.current){
             this.boardRef.current.updateTiles(tiles)
+        }
+    }
+
+    gameOver(row : number,col : number){
+        if (this.boardRef.current){
+            this.boardRef.current.gameOver(row,col)
         }
     }
 

@@ -7,7 +7,8 @@ const DIR = new Set<[number, number]>([[1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1
 
 export enum GameStatus {
     InGame,
-    Over
+    Lost,
+    Win,
 }
 
 export default class Game {
@@ -39,7 +40,7 @@ export default class Game {
         }
 
         if (!startTile.discover()) {
-            this.gameStatus = GameStatus.Over
+            this.gameStatus = GameStatus.Lost
             return {tiles :{}, nbTiles :0};
         }
 
@@ -82,6 +83,12 @@ export default class Game {
 
         const nbTiles = Object.keys(tilesFound).length
         this.cptTileDiscoverd[numplayer] += nbTiles
+
+        //
+        if (this.discoveredTiles.size === this.board.width * this.board.height - this.board.nbBomb){
+            this.gameStatus = GameStatus.Win
+        }
+        //
 
         return {tiles : tilesFound, nbTiles : nbTiles};
     }

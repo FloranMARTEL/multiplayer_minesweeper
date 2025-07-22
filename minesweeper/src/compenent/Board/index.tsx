@@ -45,6 +45,13 @@ export default class Board extends React.Component<MyProps, MyState> {
         }
     }
 
+    gameOver(row : number, col: number){
+        const tileref = this.tiles[row][col]
+        if (tileref.current){
+            tileref.current.setBomb()
+        }
+    }
+
     setFlag(row: number, col: number) {
         const tileref = this.tiles[row][col]
 

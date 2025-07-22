@@ -14,6 +14,7 @@ type MyProps = {
 enum TypeTile {
     Hide,
     Flag,
+    Bomb,
     Show
 }
 
@@ -41,9 +42,11 @@ export default class Tile extends React.Component<MyProps, MyState> {
     remouveFlag(){
         this.setState({status : TypeTile.Hide})
     }
+    setBomb(){
+        this.setState({status: TypeTile.Bomb})
+    }
 
     leftClick(){
-        console.log("clickDroit")
         if (this.state.status === TypeTile.Hide){
             this.props.sendDiscoverTile()
         }
@@ -79,6 +82,9 @@ export default class Tile extends React.Component<MyProps, MyState> {
         }
         else if (this.state.status === TypeTile.Flag){
             src = path_img + "flag.png"
+        }
+        else if (this.state.status === TypeTile.Bomb){
+            src = path_img + "bomb.png"
         }
 
         if (src){

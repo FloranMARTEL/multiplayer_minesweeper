@@ -1,3 +1,4 @@
+import { NumericLiteral } from "typescript";
 import ApiMinesweeper from "./ApiMinesweeper";
 
 export default class WebsocketGame {
@@ -14,7 +15,8 @@ export default class WebsocketGame {
         remouveFlag: (row: number, col: number) => void,
         setPlayersList: ( players : { [key : number]: { name: string, flag: string }} ) => void,
         addPlayer: (playerId : number, player: { name: string; flag: string; }) => void,
-        initGameBoard: () => void
+        initGameBoard: () => void,
+        gameOver: (row : number, col : number) => void
     ) {
         console.log("creaction websocket")
         this.client = new WebSocket('ws://localhost:5000');
@@ -90,6 +92,9 @@ export default class WebsocketGame {
                 this.client.onclose = () => {
                     console.log("connection closed")
                 }
+            }
+            else if(jsonmessage.type === "GameOver"){
+                gameOver(jsonmessage.row,jsonmessage.col)
             }
 
         }

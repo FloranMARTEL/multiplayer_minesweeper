@@ -113,7 +113,7 @@ export default class GameRoom {
 
         const {tiles,nbTiles} = this.game.discoverTileWithRowAndCol(row, col,user.id)
 
-        if (this.game.getGameStatus() === GameStatus.Over) {
+        if (this.game.getGameStatus() === GameStatus.Lost) {
 
             this.sendtoallplayer({
                 type: "GameOver",
@@ -134,8 +134,13 @@ export default class GameRoom {
                 type: "ShowCell",
                 tiles: tilesmaped,
                 nbTiles : nbTiles,
-                user: user.id
+                user: user.id,
+                gameStatus : this.game.getGameStatus()
             })
+
+            if (this.game.getGameStatus() == GameStatus.Win){
+                this.closeConnection()
+            }
         }
     }
 

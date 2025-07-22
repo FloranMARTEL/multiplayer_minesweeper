@@ -19,7 +19,7 @@ export default class Board {
     constructor(seed: number | null, height: number, width: number, nbBomb: number) {
 
         if (seed == null) {
-            seed = Math.random()
+            seed = Math.random()*(10**18)
         }
         this.seed = seed
 
