@@ -1,10 +1,12 @@
 import React, { JSX } from "react";
+import { useParams, useNavigate, useLocation, NavigateFunction, Location, Params } from 'react-router-dom';
 
 import "./styles.css";
 
 import Tile from "../Tile";
 
 import ButtonImg from "../ButtonImg";
+import ButtonSmal from "../ButtonSmal";
 
 type MyState = {}
 type MyProps = {
@@ -14,6 +16,8 @@ type MyProps = {
     sendDiscoverTile: (r: number, c: number) => void
     sendSetFlag: (r: number, c: number) => void
     sendRemouveFlag: (r: number, c: number) => void
+    sendLeaveGame: () => void,
+    navigate: NavigateFunction
 }
 
 export default class Board extends React.Component<MyProps, MyState> {
@@ -45,9 +49,9 @@ export default class Board extends React.Component<MyProps, MyState> {
         }
     }
 
-    gameOver(row : number, col: number){
+    gameOver(row: number, col: number) {
         const tileref = this.tiles[row][col]
-        if (tileref.current){
+        if (tileref.current) {
             tileref.current.setBomb()
         }
     }
@@ -67,6 +71,11 @@ export default class Board extends React.Component<MyProps, MyState> {
         if (tileref.current) {
             tileref.current.remouveFlag()
         }
+    }
+
+    buttonLeaveGame() {
+        this.props.sendLeaveGame()
+        this.props.navigate("/")
     }
 
     render() {
@@ -96,23 +105,27 @@ export default class Board extends React.Component<MyProps, MyState> {
 
 
         return (
-            <div className="boxOut">
-                <div className="boxIn headBoard">
-                    <div className="boxIn">
-                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+            <div>
+                <div className="boxOut boardBox">
+                    <div className="boxIn headBoard">
+                        <div className="boxIn">
+                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                        </div>
+                        <ButtonImg src="/icon/smileYellow.png" alt="smile yellow" onClick={() => console.log("TODO")} />
+                        <div className="boxIn">
+                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                        </div>
                     </div>
-                    <ButtonImg src="/icon/smileYellow.png" alt="smile yellow" onClick={()=>console.log("TODO")}/>
-                    <div className="boxIn">
-                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                        <img src="\tileFont\default\digit\d0.svg" alt="0" />
+                    <div className="boxIn board">
+                        {rows}
                     </div>
+
                 </div>
-                <div className="boxIn board">
-                    {rows}
-                </div>
+                <ButtonSmal onClick={() => this.buttonLeaveGame()} text="leave" />
             </div>
         );
 

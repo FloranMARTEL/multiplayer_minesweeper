@@ -9,7 +9,7 @@ type MyState = {
 }
 
 type MyProps = {
-    players : { [key : number]: { name: string, flag: string }}
+    players : number[]
 }
 
 export default class PlayersListGame extends React.Component<MyProps, MyState> {
@@ -18,16 +18,16 @@ export default class PlayersListGame extends React.Component<MyProps, MyState> {
         super(props)
 
         const playersState : { [key : number] : {nbTiles : number}} = {}
-        for (const userId in this.props.players){
+        for (const userId of this.props.players){
             playersState[userId] = {nbTiles : 0}
         }
         this.state = {playersState}
     }
 
     addCptTiles(userId : number, nbTilesAdd : number){
-        this.state.playersState[userId].nbTiles += nbTilesAdd
+        this.state.playersState[userId].nbTiles += nbTilesAdd // m'auvais pratique
+        // il faut recrée une list
         this.setState({}) //update the component
-
     }
 
     render(): React.ReactNode {
@@ -35,9 +35,8 @@ export default class PlayersListGame extends React.Component<MyProps, MyState> {
 
         const playersList : JSX.Element[] = []
 
-        for (const userId in this.props.players){
-            const player = this.props.players[userId]
-            const element = <PlayerResumState key={userId} photo={"/test.jpg"} name={player.name} flag={`/flag/${player.flag}.png`} nbTiles={this.state.playersState[userId]?.nbTiles || 0}/>
+        for (const userId of this.props.players){
+            const element = <PlayerResumState key={userId} id={Number(userId)} nbTiles={this.state.playersState[userId]?.nbTiles || 0}/>
             playersList.push(element)
         }
         

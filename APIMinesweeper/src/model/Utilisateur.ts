@@ -2,7 +2,7 @@ import UtilisateurAnonyme from "./UtilisateurAnonyme.js"
 
 export default abstract class Utilisateur{
 
-    static Utilisateurs : { [key:string] : Utilisateur } = {};
+    private static Utilisateurs : { [key:string] : Utilisateur } = {};
 
     id : number
 

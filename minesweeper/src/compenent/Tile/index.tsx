@@ -54,7 +54,6 @@ export default class Tile extends React.Component<MyProps, MyState> {
 
     rightclick(event : React.MouseEvent<HTMLDivElement>){
         event.preventDefault();
-        console.log(event.button)
         if (event.button === Typeclick.right){
             if (this.state.status === TypeTile.Hide){
                 this.props.sendSetFlag()

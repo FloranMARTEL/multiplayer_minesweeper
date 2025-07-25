@@ -1,28 +1,27 @@
-import { NumericLiteral } from "typescript";
-import ApiMinesweeper from "./ApiMinesweeper";
+import TokenManager from "./TokenManager";
+
+import {GameManager} from "../pages/GameManager";
 
 export default class WebsocketGame {
 
     client: WebSocket
 
     //if roomID = null send create game
-    constructor(roomId : number | null,
-        setGameStatus: (height: number, width: number, nbBomb: number, roomId: number, roomSize : number) => void,
-        updateGameStatus: (height: number, width: number, nbBomb: number, roomSize : number) => void,
-        updateTiles: (tiles: { [key: number]: number }) => void,
-        addCptTiles: (userId : number, nbTiles : number) => void,
-        setFlag: (row: number, col: number) => void,
-        remouveFlag: (row: number, col: number) => void,
-        setPlayersList: ( players : { [key : number]: { name: string, flag: string }} ) => void,
-        addPlayer: (playerId : number, player: { name: string; flag: string; }) => void,
-        initGameBoard: () => void,
-        gameOver: (row : number, col : number) => void
+    constructor(roomId : number | null, gameManager : GameManager
+        // setGameStatus: (height: number, width: number, nbBomb: number, roomId: number, roomSize : number) => void,
+        // updateGameStatus: (height: number, width: number, nbBomb: number, roomSize : number) => void,
+        // updateTiles: (tiles: { [key: number]: number }) => void,
+        // addCptTiles: (userId : number, nbTiles : number) => void,
+        // setFlag: (row: number, col: number) => void,
+        // remouveFlag: (row: number, col: number) => void,
+        // setPlayersList: ( playersId : number[] ) => void,
+        // addPlayer: (playerId : number) => void,
+        // initGameBoard: () => void,
+        // gameOver: (row : number, col : number) => void
     ) {
-        console.log("creaction websocket")
         this.client = new WebSocket('ws://localhost:5000');
 
         this.client.onopen = () => {
-            console.log("Client connected");
 
             if (roomId === null){
                 this.sendCreateGame()
@@ -35,89 +34,80 @@ export default class WebsocketGame {
             const jsonmessage = JSON.parse(event.data.toString());
             console.log(jsonmessage)
             if (jsonmessage.type === "CreateGame") {
-                setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
-                
-                ApiMinesweeper.GetPlayerResumByID(jsonmessage.hostId)
-                .then((player)=>{
-                    addPlayer(jsonmessage.hostId,player)
-                })
+                gameManager.setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
+                gameManager.addPlayer(jsonmessage.hostId)
 
             }else if (jsonmessage.type === "JoinGame") {
-                setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
+                gameManager.setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
                 
                 //set player list
                 const playersId = jsonmessage.playersId as number[];
-                let players : { [key : number]: { name: string, flag: string }} = {}
-
-                Promise.all(playersId.map(async (playerId : number) => {
-                    const player = await ApiMinesweeper.GetPlayerResumByID(playerId)
-                    players[playerId] = player
-                })).then(()=>{
-                    setPlayersList(players)
-                })
+                gameManager.setPlayersList(playersId)
                 
             }else if (jsonmessage.type === "NewPlayer"){
                 const playerId = jsonmessage.playerId as number
-                ApiMinesweeper.GetPlayerResumByID(playerId)
-                .then((player)=>{
-                    addPlayer(playerId,player)
-                })
+                gameManager.addPlayer(playerId)
 
             }else if (jsonmessage.type === "UpdateStateGame"){
-                updateGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb,jsonmessage.roomSize)
+                gameManager.updateGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb,jsonmessage.roomSize)
             }
             
             else if (jsonmessage.type === "StartGame"){
-                initGameBoard()
+                gameManager.initGameBoard()
             
             }else if (jsonmessage.type === "ShowCell") {
                 // updateTile
                 const tiles = jsonmessage.tiles as { [key: number]: number }
-                updateTiles(tiles)
+                gameManager.updateTiles(tiles)
 
                 //update compteur tiles
                 const nbTiles = jsonmessage.nbTiles as number
                 const userid = jsonmessage.user as number
-                addCptTiles(userid,nbTiles)
+                gameManager.addCptTiles(userid,nbTiles)
             }
             else if (jsonmessage.type === "Flag") {
                 const action = jsonmessage.action
                 const row = jsonmessage.row
                 const col = jsonmessage.col
                 if (action === "set") {
-                    setFlag(row, col)
+                    gameManager.setFlag(row, col)
                 } else if (action === "remouve") {
-                    remouveFlag(row, col)
+                    gameManager.remouveFlag(row, col)
                 }
                 this.client.onclose = () => {
                     console.log("connection closed")
                 }
             }
             else if(jsonmessage.type === "GameOver"){
-                gameOver(jsonmessage.row,jsonmessage.col)
+                gameManager.gameOver(jsonmessage.row,jsonmessage.col)
+            }else if (jsonmessage.type === "DeleteGame"){
+                this.client.close()
+                gameManager.leaveGame()
+            }else if (jsonmessage.type === "LeaveGame"){
+                gameManager.remouvePlayer(jsonmessage.userId)
             }
 
         }
 
     }
 
-    private sendCreateGame() {
+    private async sendCreateGame() {
         this.client.send(JSON.stringify({
             type: "CreateGame",
             width: 10,
             height: 10,
             nbBomb: 10,
             roomSize : 10,
-            token: 0
+            token: await TokenManager.GetToken()
         }))
     }
     
 
-    private sendJoinGame(roomID : number){
+    private async sendJoinGame(roomID : number){
         this.client.send(JSON.stringify({
             type: "JoinGame",
             roomId : roomID,
-            token: 1
+            token: await TokenManager.GetToken()
         }))
     }
 
@@ -162,6 +152,12 @@ export default class WebsocketGame {
     sendStartGame(){
         this.client.send(JSON.stringify({
             type:"StartGame"
+        }))
+    }
+
+    sendLeaveGame(){
+        this.client.send(JSON.stringify({
+            type:"LeaveGame",
         }))
     }
 

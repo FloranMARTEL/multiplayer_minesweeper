@@ -4,8 +4,6 @@ import Utilisateur from "./model/Utilisateur.js";
 import GameRoom from "./GameRoom.js";
 
 import { WebSocketServer, WebSocket } from "ws";
-import { util } from "undici";
-import { timeLog } from "console";
 
 
 export default class Client {
@@ -21,7 +19,7 @@ export default class Client {
         this.socket.on("message", (data: String | Buffer) => {
 
             const message = JSON.parse(data.toString());
-
+            console.log(message)
             if (message.type === "CreateGame") {
                 this.createGame(message)
             }
@@ -38,6 +36,8 @@ export default class Client {
 
             } else if (message.type === "Flag") {
                 this.flag(message)
+            } else if (message.type === "LeaveGame"){
+                this.leaveGame(message)
             }
 
         })
@@ -161,6 +161,22 @@ export default class Client {
             this.gameRoom.setFlag(this.utilisateur,row,col)
         } else if (action === "remouve") {
             this.gameRoom.remouveFlag(this.utilisateur,row,col)
+        }
+    }
+
+    leaveGame(message : any){
+        if (!this.gameRoom || this.utilisateur === null){
+            this.socket.send(JSON.stringify({
+                type: "erreur",
+                message: "vous n'êtes pas dans une partie"
+            }))
+            return
+        }
+
+        if (this.gameRoom.isHost(this)){
+            this.gameRoom.deleteGameRoom()
+        }else{
+            this.gameRoom.leaveGameRoom(this)
         }
     }
 }

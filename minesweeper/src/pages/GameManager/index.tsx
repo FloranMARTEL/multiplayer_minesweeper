@@ -2,12 +2,12 @@ import React from "react";
 
 import { useParams, useNavigate, useLocation, NavigateFunction, Location, Params } from 'react-router-dom';
 
+import "../../extension/extensionListe"
 
 
 import Board from "../../compenent/Board";
 import Room from "../../compenent/Room";
 import WebsocketGame from "../../server/WebsocketGame";
-import ButtonSmal from "../../compenent/ButtonSmal";
 import UserResum from "../../compenent/UserResum";
 import PlayersListGame from "../../compenent/PlayersListGame";
 
@@ -33,7 +33,7 @@ type MyState = {
         roomId: number,
         roomSize: number
     },
-    players: { [key : number]: { name: string, flag: string }}
+    playersId: number[]
 }
 type MyProps = {
     params: Readonly<Params<string>>;
@@ -47,7 +47,7 @@ enum GameManagerPath {
     InGame = "inGame"
 }
 
-class GameManager extends React.Component<MyProps, MyState> {
+export class GameManager extends React.Component<MyProps, MyState> {
 
     client: WebsocketGame;
     roomRef: React.RefObject<Room | null>;
@@ -90,29 +90,29 @@ class GameManager extends React.Component<MyProps, MyState> {
 
         this.state = {
             state: null,
-            players: {}
+            playersId: []
         }
 
 
         //
         let roomid = null
         if (this.props.params.path as GameManagerPath === GameManagerPath.JoinRoom) {
-            
+
             roomid = Number(this.props.params.roomId);
         }
         //
 
-        this.client = new WebsocketGame(roomid,
-            this.setGameStatus,
-            this.updateGameStatus,
-            this.updateTiles,
-            this.addCptTiles,
-            this.setFlag,
-            this.remouveFlag,
-            this.setPlayersList,
-            this.addPlayer,
-            this.initGameBoard,
-            this.gameOver
+        this.client = new WebsocketGame(roomid, this
+            // this.setGameStatus,
+            // this.updateGameStatus,
+            // this.updateTiles,
+            // this.addCptTiles,
+            // this.setFlag,
+            // this.remouveFlag,
+            // this.setPlayersList,
+            // this.addPlayer,
+            // this.initGameBoard,
+            // this.gameOver
         )
 
 
@@ -123,51 +123,65 @@ class GameManager extends React.Component<MyProps, MyState> {
     }
 
     updateGameStatus(height: number, width: number, nbBomb: number, roomSize: number) {
-        if (this.state.state === null){
+        if (this.state.state === null) {
             return
         }
         this.setState({ state: { height: height, width: width, nbBomb: nbBomb, roomId: this.state.state.roomId, roomSize: roomSize } })
     }
 
     updateTiles(tiles: { [key: number]: number }) {
-        if(this.boardRef.current){
+        if (this.boardRef.current) {
             this.boardRef.current.updateTiles(tiles)
         }
     }
 
-    gameOver(row : number,col : number){
-        if (this.boardRef.current){
-            this.boardRef.current.gameOver(row,col)
+    gameOver(row: number, col: number) {
+        if (this.boardRef.current) {
+            this.boardRef.current.gameOver(row, col)
         }
     }
 
-    addCptTiles(userId : number, nbTiles : number){
-        if(this.playerListGameRef.current){
-            this.playerListGameRef.current.addCptTiles(userId,nbTiles)
+    addCptTiles(userId: number, nbTiles: number) {
+        if (this.playerListGameRef.current) {
+            this.playerListGameRef.current.addCptTiles(userId, nbTiles)
         }
     }
 
     setFlag(row: number, col: number) {
-        if (this.boardRef.current){
-            this.boardRef.current.setFlag(row,col)
+        if (this.boardRef.current) {
+            this.boardRef.current.setFlag(row, col)
         }
     }
     remouveFlag(row: number, col: number) {
-        if (this.boardRef.current){
-            this.boardRef.current.remouveflag(row,col)
+        if (this.boardRef.current) {
+            this.boardRef.current.remouveflag(row, col)
         }
     }
 
-    setPlayersList(players: { [key : number]: { name: string, flag: string }}) {
-        this.setState({ players: players })
+    setPlayersList(playersId: number[]) {
+        this.setState({ playersId: playersId })
     }
 
-    addPlayer(playerId : number, player: { name: string; flag: string; }) {
-        this.setState({ players: {[playerId] : player, ...this.state.players} })
+    addPlayer(playerId: number) {
+        this.state.playersId.push(playerId)
+        this.setState({}) //update State
+    }
+
+    remouvePlayer(playerId: number) {
+        this.state.playersId.remouve(playerId)
+        this.setState({}) //update State
+    }
+
+    leaveGame() {
+        this.props.navigate("/")
     }
 
     sendStartGame() {
         this.client.sendStartGame()
+    }
+
+    sendLeaveGame() {
+        this.client.sendLeaveGame()
     }
 
     sendDiscoverTile(r: number, c: number) {
@@ -182,7 +196,7 @@ class GameManager extends React.Component<MyProps, MyState> {
         this.client.sendRemouveFlag(r, c)
     }
 
-    sendUpdateStateGame(height : number, width : number, nbBomb : number, roomSize : number){
+    sendUpdateStateGame(height: number, width: number, nbBomb: number, roomSize: number) {
         this.client.sendUpdateStateGame(height, width, nbBomb, roomSize)
     }
 
@@ -192,43 +206,36 @@ class GameManager extends React.Component<MyProps, MyState> {
     }
 
 
-
-
-
     render(): React.ReactNode {
 
 
         const path = this.props.params.path as GameManagerPath
 
         let compenent = null
-        let page : React.ReactNode = <div></div>
+        let page: React.ReactNode = <div></div>
 
         switch (path) { // TODO faire en sorte que la room prend en change le cas host et non host
             case GameManagerPath.CreateRoom:
 
 
-                compenent = <Room ref={this.roomRef} host={true} sendUpdateStateGame={this.sendUpdateStateGame} startGame={this.sendStartGame} state={this.state.state} players={this.state.players}/>
+                compenent = <Room ref={this.roomRef} host={true} navigate={this.props.navigate} sendLeaveGame={() => this.sendLeaveGame()} sendUpdateStateGame={this.sendUpdateStateGame} startGame={this.sendStartGame} state={this.state.state} players={this.state.playersId} />
                 page = <main>
-                            <div>
-                                {compenent}
-                                <ButtonSmal onClick={() => console.log("test")} text="leave" />
-                            </div>
-                            <UserResum />
-                        </main>
+                    {compenent}
+                    <UserResum />
+                </main>
                 break
             case GameManagerPath.JoinRoom:
-                compenent = <Room ref={this.roomRef} startGame={this.sendStartGame} state={this.state.state} players={this.state.players}></Room>
+                compenent = <Room ref={this.roomRef} navigate={this.props.navigate} sendLeaveGame={() => this.sendLeaveGame()} startGame={this.sendStartGame} state={this.state.state} players={this.state.playersId} />
                 page = <main>
-                            <div>
-                                {compenent}
-                                <ButtonSmal onClick={() => console.log("test")} text="leave" />
-                            </div>
-                            <UserResum />
-                        </main>
+                    {compenent}
+                    <UserResum />
+                </main>
                 break
             case GameManagerPath.InGame:
                 if (this.state.state !== null) {
                     compenent = <Board ref={this.boardRef}
+                        sendLeaveGame={() => this.sendLeaveGame()}
+                        navigate={this.props.navigate}
                         height={this.state.state.height}
                         width={this.state.state.width}
                         nbBomb={this.state.state.nbBomb}
@@ -236,14 +243,14 @@ class GameManager extends React.Component<MyProps, MyState> {
                         sendRemouveFlag={this.sendRemouveFlag}
                         sendSetFlag={this.sendSetFlag} />
                 }
-                console.log("players : ",this.state.players)
-                page = 
-                <main>
-                    {compenent}
-                    <PlayersListGame players={this.state.players} ref={this.playerListGameRef}/>
-                </main>
 
-                
+                page =
+                    <main>
+                        {compenent}
+                        <PlayersListGame players={this.state.playersId} ref={this.playerListGameRef} />
+                    </main>
+
+
 
         }
 

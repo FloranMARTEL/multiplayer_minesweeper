@@ -12,7 +12,7 @@ export default class GameRoom {
 
     private roomID: number
     private roomSize: number
-    private players: Client[]
+    private players: Set<Client> //Client[]
     private game: Game | null
     private host: Client
 
@@ -25,7 +25,7 @@ export default class GameRoom {
 
         this.roomID = ++GameRoom.CptID
         this.roomSize = roomSize
-        this.players = [host]
+        this.players = new Set([host])
         this.game = null
         this.host = host
 
@@ -37,7 +37,7 @@ export default class GameRoom {
     }
 
     joinGameRoom(cli: Client): boolean {
-        if (this.players.length >= this.roomSize) {
+        if (this.players.size >= this.roomSize) {
             return false
         }
 
@@ -46,7 +46,7 @@ export default class GameRoom {
             playerId : cli.utilisateur?.id
         })
 
-        this.players.push(cli)
+        this.players.add(cli)
 
         cli.socket.send(JSON.stringify({
             type: "JoinGame",
@@ -59,6 +59,14 @@ export default class GameRoom {
         }))
 
         return true
+    }
+
+    leaveGameRoom(client : Client){
+        this.players.delete(client)
+        this.sendtoallplayer({
+            type : "LeaveGame",
+            userId : client.utilisateur!.id
+        })
     }
 
     startGame(): boolean {
@@ -80,7 +88,7 @@ export default class GameRoom {
     }
 
     getAllPlayersID() : number[]{
-        const idplayers = this.players.map((cli)=>{
+        const idplayers = [...(this.players)].map((cli)=>{
             return cli.utilisateur?.id
         }) as number[];
 
@@ -180,6 +188,14 @@ export default class GameRoom {
                 col: col
             })
     }
+
+    deleteGameRoom(){
+        this.sendtoallplayer({
+            type : "DeleteGame"
+        })
+        GameRoom.DeleteGameRoom(this)
+        this.closeConnection()
+    }
     ///
 
 
@@ -218,5 +234,9 @@ export default class GameRoom {
     static GetGameRoom(roomID: number): GameRoom | null {
         const gameroom = GameRoom.GameRooms[roomID]
         return gameroom ? gameroom : null
+    }
+
+    static DeleteGameRoom(gameRoom : GameRoom): void {
+        delete GameRoom.GameRooms[gameRoom.roomID]
     }
 }
