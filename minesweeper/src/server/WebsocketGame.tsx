@@ -7,18 +7,7 @@ export default class WebsocketGame {
     client: WebSocket
 
     //if roomID = null send create game
-    constructor(roomId : number | null, gameManager : GameManager
-        // setGameStatus: (height: number, width: number, nbBomb: number, roomId: number, roomSize : number) => void,
-        // updateGameStatus: (height: number, width: number, nbBomb: number, roomSize : number) => void,
-        // updateTiles: (tiles: { [key: number]: number }) => void,
-        // addCptTiles: (userId : number, nbTiles : number) => void,
-        // setFlag: (row: number, col: number) => void,
-        // remouveFlag: (row: number, col: number) => void,
-        // setPlayersList: ( playersId : number[] ) => void,
-        // addPlayer: (playerId : number) => void,
-        // initGameBoard: () => void,
-        // gameOver: (row : number, col : number) => void
-    ) {
+    constructor(roomId : number | null, gameManager : GameManager) {
         this.client = new WebSocket('ws://localhost:5000');
 
         this.client.onopen = () => {
@@ -53,7 +42,7 @@ export default class WebsocketGame {
             }
             
             else if (jsonmessage.type === "StartGame"){
-                gameManager.initGameBoard()
+                gameManager.initGameBoard(jsonmessage.timestemp)
             
             }else if (jsonmessage.type === "ShowCell") {
                 // updateTile
@@ -64,6 +53,12 @@ export default class WebsocketGame {
                 const nbTiles = jsonmessage.nbTiles as number
                 const userid = jsonmessage.user as number
                 gameManager.addCptTiles(userid,nbTiles)
+
+                //check status Parti
+                console.log(jsonmessage.gameStatus === 2)
+                if (jsonmessage.gameStatus === 2){
+                    gameManager.gameDone()
+                }
             }
             else if (jsonmessage.type === "Flag") {
                 const action = jsonmessage.action

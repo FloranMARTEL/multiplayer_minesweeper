@@ -7,12 +7,16 @@ import Tile from "../Tile";
 
 import ButtonImg from "../ButtonImg";
 import ButtonSmal from "../ButtonSmal";
+import Compteur from "../Compteur";
 
-type MyState = {}
+type MyState = {
+    inGame : boolean
+}
 type MyProps = {
     height: number,
     width: number,
     nbBomb: number,
+    timestempStart : number,
     sendDiscoverTile: (r: number, c: number) => void
     sendSetFlag: (r: number, c: number) => void
     sendRemouveFlag: (r: number, c: number) => void
@@ -24,9 +28,16 @@ export default class Board extends React.Component<MyProps, MyState> {
 
     tiles: React.RefObject<Tile | null>[][]
 
+    compteurBombRef : React.RefObject<Compteur | null>;
+    compteurTempsRef : React.RefObject<Compteur | null>;
+
     constructor(props: MyProps) {
         super(props);
 
+        this.state = {inGame : true}
+
+        this.compteurBombRef = React.createRef<Compteur>();
+        this.compteurTempsRef = React.createRef<Compteur>();
         //generate grid
         this.tiles = []
         for (let l = 0; l < this.props.height; l++) {
@@ -35,6 +46,8 @@ export default class Board extends React.Component<MyProps, MyState> {
                 this.tiles[l].push(React.createRef<Tile>())
             }
         }
+
+        this.updateCompteurTemps()
     }
 
     updateTiles(tilesdict: { [key: number]: number }) {
@@ -54,9 +67,20 @@ export default class Board extends React.Component<MyProps, MyState> {
         if (tileref.current) {
             tileref.current.setBomb()
         }
+        this.gameDone()
+    }
+
+    gameDone(){
+        this.setState({inGame : false})
+        console.log("Modification : ",this.state.inGame)
     }
 
     setFlag(row: number, col: number) {
+        
+        if (this.compteurBombRef.current){
+            this.compteurBombRef.current.decrement()
+        }
+        
         const tileref = this.tiles[row][col]
 
         if (tileref.current) {
@@ -66,8 +90,11 @@ export default class Board extends React.Component<MyProps, MyState> {
 
 
     remouveflag(row: number, col: number) {
-        const tileref = this.tiles[row][col]
+        if (this.compteurBombRef.current){
+            this.compteurBombRef.current.increment()
+        }
 
+        const tileref = this.tiles[row][col]
         if (tileref.current) {
             tileref.current.remouveFlag()
         }
@@ -76,6 +103,16 @@ export default class Board extends React.Component<MyProps, MyState> {
     buttonLeaveGame() {
         this.props.sendLeaveGame()
         this.props.navigate("/")
+    }
+
+    async updateCompteurTemps(){
+        while(this.state.inGame){
+            console.log(this.state.inGame)
+            if (this.compteurTempsRef.current){
+                this.compteurTempsRef.current.increment()
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
     }
 
     render() {
@@ -101,24 +138,13 @@ export default class Board extends React.Component<MyProps, MyState> {
             );
         }
 
-
-
-
         return (
             <div>
                 <div className="boxOut boardBox">
                     <div className="boxIn headBoard">
-                        <div className="boxIn">
-                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                        </div>
+                        <Compteur ref={this.compteurBombRef} valueinit={this.props.nbBomb} />
                         <ButtonImg src="/icon/smileYellow.png" alt="smile yellow" onClick={() => console.log("TODO")} />
-                        <div className="boxIn">
-                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                            <img src="\tileFont\default\digit\d0.svg" alt="0" />
-                        </div>
+                        <Compteur ref={this.compteurTempsRef} valueinit={Math.floor((Date.now() - this.props.timestempStart)/1000)}/>
                     </div>
                     <div className="boxIn board">
                         {rows}

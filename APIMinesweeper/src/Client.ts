@@ -62,6 +62,7 @@ export default class Client {
         const height = message.height
         const width = message.width
         const nbBomb = message.nbBomb
+
         this.gameRoom = new GameRoom(this,roomSize,height,width,nbBomb)
 
 

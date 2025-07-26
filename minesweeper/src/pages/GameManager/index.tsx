@@ -10,6 +10,7 @@ import Room from "../../compenent/Room";
 import WebsocketGame from "../../server/WebsocketGame";
 import UserResum from "../../compenent/UserResum";
 import PlayersListGame from "../../compenent/PlayersListGame";
+import { NumericLiteral } from "typescript";
 
 export default function GameManagerWrapper() {
     const params = useParams();
@@ -54,6 +55,8 @@ export class GameManager extends React.Component<MyProps, MyState> {
     boardRef: React.RefObject<Board | null>;
     playerListGameRef: React.RefObject<PlayersListGame | null>;
 
+    timestemp : number | null
+
 
     constructor(props: MyProps) {
         super(props)
@@ -90,8 +93,9 @@ export class GameManager extends React.Component<MyProps, MyState> {
 
         this.state = {
             state: null,
-            playersId: []
+            playersId: [],
         }
+        this.timestemp = null
 
 
         //
@@ -102,18 +106,7 @@ export class GameManager extends React.Component<MyProps, MyState> {
         }
         //
 
-        this.client = new WebsocketGame(roomid, this
-            // this.setGameStatus,
-            // this.updateGameStatus,
-            // this.updateTiles,
-            // this.addCptTiles,
-            // this.setFlag,
-            // this.remouveFlag,
-            // this.setPlayersList,
-            // this.addPlayer,
-            // this.initGameBoard,
-            // this.gameOver
-        )
+        this.client = new WebsocketGame(roomid, this)
 
 
     }
@@ -138,6 +131,12 @@ export class GameManager extends React.Component<MyProps, MyState> {
     gameOver(row: number, col: number) {
         if (this.boardRef.current) {
             this.boardRef.current.gameOver(row, col)
+        }
+    }
+
+    gameDone(){
+        if (this.boardRef.current) {
+            this.boardRef.current.gameDone()
         }
     }
 
@@ -201,7 +200,8 @@ export class GameManager extends React.Component<MyProps, MyState> {
     }
 
 
-    initGameBoard() {
+    initGameBoard(timestemp : number) {
+        this.timestemp = timestemp
         this.props.navigate("/game/inGame")
     }
 
@@ -241,7 +241,9 @@ export class GameManager extends React.Component<MyProps, MyState> {
                         nbBomb={this.state.state.nbBomb}
                         sendDiscoverTile={this.sendDiscoverTile}
                         sendRemouveFlag={this.sendRemouveFlag}
-                        sendSetFlag={this.sendSetFlag} />
+                        sendSetFlag={this.sendSetFlag} 
+                        timestempStart={this.timestemp!}/>
+                        
                 }
 
                 page =

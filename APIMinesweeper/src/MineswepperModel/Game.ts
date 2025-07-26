@@ -16,14 +16,17 @@ export default class Game {
     private board: Board
     private gameStatus: GameStatus
     private discoveredTiles: Set<Tile>
+    private timestemp : number
 
     private flags: { [key : number] : Set<number>}
     private cptTileDiscoverd: { [key : number] : number}
 
-    constructor(seed: number | null, height: number, width: number, nbBomb: number, idplayers : number[]) {
+    constructor(seed: number | null, height: number, width: number, nbBomb: number, idplayers : number[],timestemp : number) {
         this.board = new Board(seed, height, width, nbBomb)
         this.gameStatus = GameStatus.InGame
         this.discoveredTiles = new Set()
+
+        this.timestemp = timestemp
 
         this.flags = {}
         this.cptTileDiscoverd = {}

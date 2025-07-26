@@ -76,9 +76,15 @@ export default class GameRoom {
 
         const idplayers = this.getAllPlayersID()
 
-        this.game = new Game(null, this.gameHeight, this.gameWidth, this.gameNbBomb, idplayers)
+        const timestemp = Date.now()
 
-        this.sendtoallplayer({type : "StartGame"})
+
+        this.game = new Game(null, this.gameHeight, this.gameWidth, this.gameNbBomb, idplayers,timestemp)
+
+        this.sendtoallplayer({
+            type : "StartGame",
+            timestemp : timestemp
+        })
 
         return true
     }
