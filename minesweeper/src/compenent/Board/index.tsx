@@ -1,5 +1,5 @@
 import React, { JSX } from "react";
-import { useParams, useNavigate, useLocation, NavigateFunction, Location, Params } from 'react-router-dom';
+import { NavigateFunction } from 'react-router-dom';
 
 import "./styles.css";
 
@@ -8,6 +8,7 @@ import Tile from "../Tile";
 import ButtonImg from "../ButtonImg";
 import ButtonSmal from "../ButtonSmal";
 import Compteur from "../Compteur";
+import RestartMenu from "../RestartMenu";
 
 type MyState = {
     inGame : boolean
@@ -72,7 +73,6 @@ export default class Board extends React.Component<MyProps, MyState> {
 
     gameDone(){
         this.setState({inGame : false})
-        console.log("Modification : ",this.state.inGame)
     }
 
     setFlag(row: number, col: number) {
@@ -101,13 +101,13 @@ export default class Board extends React.Component<MyProps, MyState> {
     }
 
     buttonLeaveGame() {
+        this.setState({inGame:false})
         this.props.sendLeaveGame()
         this.props.navigate("/")
     }
 
     async updateCompteurTemps(){
         while(this.state.inGame){
-            console.log(this.state.inGame)
             if (this.compteurTempsRef.current){
                 this.compteurTempsRef.current.increment()
             }
@@ -138,6 +138,14 @@ export default class Board extends React.Component<MyProps, MyState> {
             );
         }
 
+
+        const restartMenu = (this.state.inGame === false)?
+                <RestartMenu  sendRestart={()=>console.log("Work In Progress")} goHome={() => this.props.navigate("/")}/>
+                :
+                <ButtonSmal onClick={() => this.buttonLeaveGame()} text="leave" />
+
+        
+
         return (
             <div>
                 <div className="boxOut boardBox">
@@ -151,7 +159,8 @@ export default class Board extends React.Component<MyProps, MyState> {
                     </div>
 
                 </div>
-                <ButtonSmal onClick={() => this.buttonLeaveGame()} text="leave" />
+                
+                {restartMenu}
             </div>
         );
 

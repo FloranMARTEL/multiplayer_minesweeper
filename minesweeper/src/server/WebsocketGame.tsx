@@ -11,6 +11,7 @@ export default class WebsocketGame {
         this.client = new WebSocket('ws://localhost:5000');
 
         this.client.onopen = () => {
+            console.log("connection open")
 
             if (roomId === null){
                 this.sendCreateGame()
@@ -55,7 +56,6 @@ export default class WebsocketGame {
                 gameManager.addCptTiles(userid,nbTiles)
 
                 //check status Parti
-                console.log(jsonmessage.gameStatus === 2)
                 if (jsonmessage.gameStatus === 2){
                     gameManager.gameDone()
                 }
