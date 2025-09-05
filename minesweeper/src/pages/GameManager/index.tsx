@@ -26,6 +26,13 @@ export default function GameManagerWrapper() {
     );
 }
 
+export enum GameStatus {
+    InRoom = -1,
+    InGame,
+    Lost,
+    Win,
+}
+
 type MyState = {
     state: null | { // déplacer se si dans le game manager
         height: number,
@@ -35,6 +42,7 @@ type MyState = {
         roomSize: number
     },
     playersId: number[]
+    gameStatus : GameStatus
 }
 type MyProps = {
     params: Readonly<Params<string>>;
@@ -94,6 +102,7 @@ export class GameManager extends React.Component<MyProps, MyState> {
         this.state = {
             state: null,
             playersId: [],
+            gameStatus : GameStatus.InRoom
         }
         this.timestemp = null
 

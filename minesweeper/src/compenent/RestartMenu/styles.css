@@ -1,0 +1,11 @@
+
+.restartMenu{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.restartMenu > div{
+    display: flex;
+    justify-content: space-around;
+}

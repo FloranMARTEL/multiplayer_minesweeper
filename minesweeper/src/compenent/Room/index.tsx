@@ -44,7 +44,6 @@ export default class Room extends React.Component<MyProps, MyState> {
             this.state = { host: false, settings: false }
         }
 
-
     }
 
     setStateSettings(settings: boolean) {
