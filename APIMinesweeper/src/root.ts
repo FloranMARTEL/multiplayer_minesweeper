@@ -13,7 +13,7 @@ import { util } from 'undici';
 
 
 router.get('/test', (req : Request, res : Response) => {
-    res.status(200).json('{test: "ok"}');
+    res.status(200).json({test: "ok"});
 });
 
 router.get("/player/:id", (req : Request, res : Response) => {
