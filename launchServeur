@@ -1,0 +1,16 @@
+#!/bin/bash
+pm2 delete minesweeper || { echo "minesweeper n'existe pas encore"; }
+pm2 delete APIminesweeper || { echo "APIminesweeper n'existe pas encore"; }
+
+
+pathFrontend="./test"
+pathBackend="./APIMinesweeper"
+
+cd "$pathFrontend" || { echo "Erreur : dossier frontend introuvable"; exit 1; }
+pm2 serve build 3000 --name minesweeper
+cd - > /dev/null
+
+cd "$pathBackend" || { echo "Erreur : dossier backend introuvable"; exit 1; }
+pm2 start dist/startServeur.js --name APIminesweeper
+
+cd - > /dev/null

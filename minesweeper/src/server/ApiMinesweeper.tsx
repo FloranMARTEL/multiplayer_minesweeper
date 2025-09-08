@@ -2,7 +2,7 @@
 export default class ApiMinesweeper {
 
 
-    static APIPATH = "http://localhost:5000/api";
+    static APIPATH = `http://${process.env.REACT_APP_API_IP}:5000/api`;
 
 
     static async GetPlayerResumByID(id: number): Promise<{ userType : string, photo? : string, name: string, flag?: string }> {
@@ -26,6 +26,8 @@ export default class ApiMinesweeper {
 
 
     static async GetTokenOfAnonymeUser(): Promise<string> {
+        console.log(`${process.env.REACT_APP_API_IP}`)
+        console.log(`${ApiMinesweeper.APIPATH}/connection`)
         const responce = await fetch(`${ApiMinesweeper.APIPATH}/connection`, {
             method: 'POST',
             headers: {

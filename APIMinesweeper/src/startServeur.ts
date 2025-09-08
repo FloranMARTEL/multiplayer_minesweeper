@@ -6,7 +6,10 @@ import express, { Request, Response } from 'express';
 import router from './root.js';
 let app = express();
 
-app.use(cors({ origin: 'http://localhost:3000' }));
+import dotenv from 'dotenv';
+dotenv.config();
+
+app.use(cors({ origin: `http://${process.env.ipAPI}:3000` }));
 app.use(express.json());
 app.use('/api', router);
 

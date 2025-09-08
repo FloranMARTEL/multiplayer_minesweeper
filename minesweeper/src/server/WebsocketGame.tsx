@@ -8,7 +8,7 @@ export default class WebsocketGame {
 
     //if roomID = null send create game
     constructor(roomId : number | null, gameManager : GameManager) {
-        this.client = new WebSocket('ws://localhost:5000');
+        this.client = new WebSocket(`ws://${process.env.REACT_APP_API_IP}:5000`);
 
         this.client.onopen = () => {
             console.log("connection open")
