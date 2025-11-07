@@ -31,7 +31,9 @@ export default class UserResum extends React.Component<MyProps, MyState> {
     async connection(){
         const token = await TokenManager.GetToken()
         const userResum = await ApiMinesweeper.GetPlayerResumByToken(token)
-        this.setState({pseudo : userResum.name})
+        if (userResum){
+            this.setState({pseudo : userResum.name})
+        }
     }
 
     render(): React.ReactNode {

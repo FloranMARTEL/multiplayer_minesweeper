@@ -22,8 +22,6 @@ export default class GameWebSocket {
             new Client(socket)
         })
 
-        //Utilisateur.Utilisateurs = {0:new UtilisateurAnonyme(),1:new UtilisateurAnonyme()};
-
     }
 }
 

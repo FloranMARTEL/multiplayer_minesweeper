@@ -55,6 +55,7 @@ export default class GameRoom {
             width: this.getWidth(),
             nbBomb: this.getNbBomb(),
             roomSize: this.getRoomSize(),
+            host: this.getHostID(),
             playersId : this.getAllPlayersID()
         }))
 
@@ -67,6 +68,8 @@ export default class GameRoom {
             type : "LeaveGame",
             userId : client.utilisateur!.id
         })
+        Client.LeaveGame(client.utilisateur!.id)
+        client.socket.close()
     }
 
     startGame(): boolean {
@@ -90,7 +93,12 @@ export default class GameRoom {
     }
 
     isHost(host: Client) {
-        return host === this.host
+
+        if (host.utilisateur && this.host.utilisateur){
+            return host.utilisateur.id === this.host.utilisateur.id
+        }
+
+        return false
     }
 
     getAllPlayersID() : number[]{
@@ -231,6 +239,14 @@ export default class GameRoom {
     }
     getRoomSize() {
         return this.roomSize
+    }
+
+    getHostID(){
+        return this.host.utilisateur?.id
+    }
+
+    getHost() : Client{
+        return this.host
     }
 
     private static AddGameRoom(gameRoom : GameRoom){

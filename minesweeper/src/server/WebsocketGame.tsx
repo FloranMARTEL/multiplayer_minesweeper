@@ -1,51 +1,55 @@
 import TokenManager from "./TokenManager";
 
-import {GameManager} from "../pages/GameManager";
+import { GameManager } from "../pages/GameManager";
 
 export default class WebsocketGame {
 
     client: WebSocket
 
     //if roomID = null send create game
-    constructor(roomId : number | null, gameManager : GameManager) {
+    constructor(roomId: number | null, gameManager: GameManager) {
         this.client = new WebSocket(`ws://${process.env.REACT_APP_API_IP}:5000`);
 
         this.client.onopen = () => {
             console.log("connection open")
 
-            if (roomId === null){
+            if (roomId === null) {
                 this.sendCreateGame()
-            }else{
+            } else {
                 this.sendJoinGame(roomId)
             }
+        }
+
+        this.client.onclose = () => {
+            console.log("connection closed")
         }
 
         this.client.onmessage = (event: MessageEvent) => {
             const jsonmessage = JSON.parse(event.data.toString());
             console.log(jsonmessage)
             if (jsonmessage.type === "CreateGame") {
-                gameManager.setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
-                gameManager.addPlayer(jsonmessage.hostId)
+                console.log("Create Game:", jsonmessage)
+                gameManager.setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId, jsonmessage.roomSize)
+                gameManager.setPlayersList(jsonmessage.playersId)
+            } else if (jsonmessage.type === "JoinGame") {
+                gameManager.setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId, jsonmessage.roomSize)
 
-            }else if (jsonmessage.type === "JoinGame") {
-                gameManager.setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId,jsonmessage.roomSize)
-                
                 //set player list
                 const playersId = jsonmessage.playersId as number[];
                 gameManager.setPlayersList(playersId)
-                
-            }else if (jsonmessage.type === "NewPlayer"){
+
+            } else if (jsonmessage.type === "NewPlayer") {
                 const playerId = jsonmessage.playerId as number
                 gameManager.addPlayer(playerId)
 
-            }else if (jsonmessage.type === "UpdateStateGame"){
-                gameManager.updateGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb,jsonmessage.roomSize)
+            } else if (jsonmessage.type === "UpdateStateGame") {
+                gameManager.updateGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomSize)
             }
-            
-            else if (jsonmessage.type === "StartGame"){
+
+            else if (jsonmessage.type === "StartGame") {
                 gameManager.initGameBoard(jsonmessage.timestemp)
-            
-            }else if (jsonmessage.type === "ShowCell") {
+
+            } else if (jsonmessage.type === "ShowCell") {
                 // updateTile
                 const tiles = jsonmessage.tiles as { [key: number]: number }
                 gameManager.updateTiles(tiles)
@@ -53,10 +57,10 @@ export default class WebsocketGame {
                 //update compteur tiles
                 const nbTiles = jsonmessage.nbTiles as number
                 const userid = jsonmessage.user as number
-                gameManager.addCptTiles(userid,nbTiles)
+                gameManager.addCptTiles(userid, nbTiles)
 
                 //check status Parti
-                if (jsonmessage.gameStatus === 2){
+                if (jsonmessage.gameStatus === 2) {
                     gameManager.gameDone()
                 }
             }
@@ -69,16 +73,13 @@ export default class WebsocketGame {
                 } else if (action === "remouve") {
                     gameManager.remouveFlag(row, col)
                 }
-                this.client.onclose = () => {
-                    console.log("connection closed")
-                }
             }
-            else if(jsonmessage.type === "GameOver"){
-                gameManager.gameOver(jsonmessage.row,jsonmessage.col)
-            }else if (jsonmessage.type === "DeleteGame"){
+            else if (jsonmessage.type === "GameOver") {
+                gameManager.gameOver(jsonmessage.row, jsonmessage.col)
+            } else if (jsonmessage.type === "DeleteGame") {
                 this.client.close()
                 gameManager.leaveGame()
-            }else if (jsonmessage.type === "LeaveGame"){
+            } else if (jsonmessage.type === "LeaveGame") {
                 gameManager.remouvePlayer(jsonmessage.userId)
             }
 
@@ -92,30 +93,30 @@ export default class WebsocketGame {
             width: 10,
             height: 10,
             nbBomb: 10,
-            roomSize : 10,
+            roomSize: 10,
             token: await TokenManager.GetToken()
         }))
     }
-    
 
-    private async sendJoinGame(roomID : number){
+
+    private async sendJoinGame(roomID: number) {
         this.client.send(JSON.stringify({
             type: "JoinGame",
-            roomId : roomID,
+            roomId: roomID,
             token: await TokenManager.GetToken()
         }))
     }
 
-    sendUpdateStateGame(height : number, width : number, nbBomb : number, roomSize : number){
+    sendUpdateStateGame(height: number, width: number, nbBomb: number, roomSize: number) {
         this.client.send(JSON.stringify({
-            type : "UpdateStateGame",
+            type: "UpdateStateGame",
             width: width,
             height: height,
             nbBomb: nbBomb,
-            roomSize : roomSize,
+            roomSize: roomSize,
         }))
     }
-    
+
 
 
     sendDiscoverTile(r: number, c: number) {
@@ -144,15 +145,15 @@ export default class WebsocketGame {
         }))
     }
 
-    sendStartGame(){
+    sendStartGame() {
         this.client.send(JSON.stringify({
-            type:"StartGame"
+            type: "StartGame"
         }))
     }
 
-    sendLeaveGame(){
+    sendLeaveGame() {
         this.client.send(JSON.stringify({
-            type:"LeaveGame",
+            type: "LeaveGame",
         }))
     }
 

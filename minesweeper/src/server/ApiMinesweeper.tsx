@@ -12,7 +12,7 @@ export default class ApiMinesweeper {
         return json
     }
 
-    static async GetPlayerResumByToken(token: string): Promise<{ name: string, flag: string }> {
+    static async GetPlayerResumByToken(token: string): Promise<{ name: string, flag: string } | null> {
         const responce = await fetch(`${ApiMinesweeper.APIPATH}/player`, {
             method : 'GET',
             headers : {
@@ -21,13 +21,16 @@ export default class ApiMinesweeper {
         })
 
         const json = await responce.json();
+
+        if (json.error){
+            return null;
+        }
+
         return json
     }
 
 
     static async GetTokenOfAnonymeUser(): Promise<string> {
-        console.log(`${process.env.REACT_APP_API_IP}`)
-        console.log(`${ApiMinesweeper.APIPATH}/connection`)
         const responce = await fetch(`${ApiMinesweeper.APIPATH}/connection`, {
             method: 'POST',
             headers: {

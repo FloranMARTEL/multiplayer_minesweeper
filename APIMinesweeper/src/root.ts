@@ -41,6 +41,7 @@ router.get("/player", (req : Request, res : Response) => {
     
     if (user === null){
         res.json({
+            error : 1000,
             message:"Erreur l'utilisateur n'existe pas"
         })
         return
