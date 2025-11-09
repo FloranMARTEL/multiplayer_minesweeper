@@ -34,6 +34,7 @@ export default class Tile extends React.Component<MyProps, MyState> {
     }
 
     updateValue(value: number) {
+        console.log("show")
         this.setState({ status: TypeTile.Show, value: value })
     }
     setFlag(){

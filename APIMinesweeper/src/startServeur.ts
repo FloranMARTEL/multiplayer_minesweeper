@@ -20,7 +20,7 @@ import GameWebSocket from "./GameWebSocket.js";
 
 const server = http.createServer(app);
 server.listen(PORT,()=>{
-  console.log(`Server Start localhost:${PORT}`)
+  console.log(`Server Start ${process.env.ipAPI}:${PORT}`)
 })
 
 const wsGameServeur = new GameWebSocket(server)

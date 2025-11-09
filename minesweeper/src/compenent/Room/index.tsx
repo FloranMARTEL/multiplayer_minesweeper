@@ -1,6 +1,6 @@
 import React, { JSX } from "react"
 
-import { useParams, useNavigate, useLocation, NavigateFunction, Location, Params } from 'react-router-dom';
+import {  NavigateFunction } from 'react-router-dom';
 
 
 import Button from "../Button"

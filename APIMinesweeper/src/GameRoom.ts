@@ -14,7 +14,7 @@ export default class GameRoom {
     private roomSize: number
     private players: Set<Client> //Client[]
     private game: Game | null
-    private host: Client
+    private host: Utilisateur
 
     private gameHeight: number
     private gameWidth: number
@@ -23,11 +23,15 @@ export default class GameRoom {
 
     constructor(host: Client, roomSize: number, gameHeight: number, gameWidth: number, gameNbBomb: number) {
 
+        if (host.utilisateur == null) {
+            throw new Error("le host n'est pas connecter à utilisateur")
+        }
+
         this.roomID = ++GameRoom.CptID
         this.roomSize = roomSize
         this.players = new Set([host])
         this.game = null
-        this.host = host
+        this.host = host.utilisateur
 
         this.gameHeight = gameHeight
         this.gameWidth = gameWidth
@@ -42,11 +46,15 @@ export default class GameRoom {
         }
 
         this.sendtoallplayer({
-            type : "NewPlayer",
-            playerId : cli.utilisateur?.id
+            type: "NewPlayer",
+            playerId: cli.utilisateur?.id
         })
 
         this.players.add(cli)
+
+        console.log("-------- xx -----")
+        console.log(cli.utilisateur)
+        console.log("-------- xx -----")
 
         cli.socket.send(JSON.stringify({
             type: "JoinGame",
@@ -56,20 +64,22 @@ export default class GameRoom {
             nbBomb: this.getNbBomb(),
             roomSize: this.getRoomSize(),
             host: this.getHostID(),
-            playersId : this.getAllPlayersID()
+            playersId: this.getAllPlayersID()
         }))
+        console.log("--------xxx -----")
+
 
         return true
     }
 
-    leaveGameRoom(client : Client){
+    leaveGameRoom(client: Client) {
         this.players.delete(client)
         this.sendtoallplayer({
-            type : "LeaveGame",
-            userId : client.utilisateur!.id
+            type: "LeaveGame",
+            userId: client.utilisateur!.id
         })
         Client.LeaveGame(client.utilisateur!.id)
-        client.socket.close()
+
     }
 
     startGame(): boolean {
@@ -82,46 +92,56 @@ export default class GameRoom {
         const timestemp = Date.now()
 
 
-        this.game = new Game(null, this.gameHeight, this.gameWidth, this.gameNbBomb, idplayers,timestemp)
+        this.game = new Game(null, this.gameHeight, this.gameWidth, this.gameNbBomb, idplayers, timestemp)
 
         this.sendtoallplayer({
-            type : "StartGame",
-            timestemp : timestemp
+            type: "StartGame",
+            timestemp: timestemp
         })
 
         return true
     }
 
-    isHost(host: Client) {
-
-        if (host.utilisateur && this.host.utilisateur){
-            return host.utilisateur.id === this.host.utilisateur.id
-        }
-
-        return false
+    isHost(host: Utilisateur) {
+        return (host.id == this.host.id)
     }
 
-    getAllPlayersID() : number[]{
-        const idplayers = [...(this.players)].map((cli)=>{
+    getAllPlayersID(): number[] {
+        const idplayers = [...(this.players)].map((cli) => {
             return cli.utilisateur?.id
         }) as number[];
 
         return idplayers
     }
 
-    updateStateGame(height : number, width : number, nbBomb : number, roomSize : number){
+    updateStateGame(height: number, width: number, nbBomb: number, roomSize: number) {
         this.gameHeight = height
         this.gameWidth = width
         this.gameNbBomb = nbBomb
         this.roomSize = roomSize
 
         this.sendtoallplayer({
-            type : "UpdateStateGame",
-            height : this.getHeight(),
-            width : this.getWidth(),
-            nbBomb : this.getNbBomb(),
-            roomSize : this.getRoomSize()
+            type: "UpdateStateGame",
+            height: this.getHeight(),
+            width: this.getWidth(),
+            nbBomb: this.getNbBomb(),
+            roomSize: this.getRoomSize()
         })
+    }
+
+    updatePlayerClient(client: Client) {
+        if (client.utilisateur == null) {
+            throw new Error("client.utilisateur est null");
+        }
+
+        for (const player of this.players) {
+            if (client.utilisateur.id == player.utilisateur!.id) {
+
+                this.players.delete(player);
+                this.players.add(client);
+                break;
+            }
+        }
     }
 
     ///
@@ -133,35 +153,46 @@ export default class GameRoom {
             return
         }
 
-        const {tiles,nbTiles} = this.game.discoverTileWithRowAndCol(row, col,user.id)
+        const { tiles, nbTiles } = this.game.discoverTileWithRowAndCol(row, col, user.id)
 
         if (this.game.getGameStatus() === GameStatus.Lost) {
 
             this.sendtoallplayer({
                 type: "GameOver",
                 user: user.id,
-                row : row,
-                col : col
+                row: row,
+                col: col
             })
-
+            //provisoire
+            this.players.forEach((player) => {
+                Client.LeaveGame(player.utilisateur!.id);
+            })
             this.closeConnection()
+            GameRoom.DeleteGameRoom(this)
+            //
         }
         else {
-            const tilesmaped : {[key : number] : number}= {}
-            for (const key in tiles){
+            const tilesmaped: { [key: number]: number } = {}
+            for (const key in tiles) {
                 tilesmaped[key] = tiles[key].getValue()
             }
 
             this.sendtoallplayer({
                 type: "ShowCell",
                 tiles: tilesmaped,
-                nbTiles : nbTiles,
+                nbTiles: nbTiles,
                 user: user.id,
-                gameStatus : this.game.getGameStatus()
+                gameStatus: this.game.getGameStatus()
             })
 
-            if (this.game.getGameStatus() == GameStatus.Win){
+            if (this.game.getGameStatus() == GameStatus.Win) {
+                //provisoire
+                this.players.forEach((player) => {
+                    Client.LeaveGame(player.utilisateur!.id);
+                })
                 this.closeConnection()
+                GameRoom.DeleteGameRoom(this)
+                //
             }
         }
     }
@@ -179,33 +210,33 @@ export default class GameRoom {
         this.sendtoallplayer({
             type: "Flag",
             action: "set",
-            user : user.id,
+            user: user.id,
             row: row,
             col: col
         })
     }
 
 
-    remouveFlag(user: Utilisateur, row: number, col: number){
+    remouveFlag(user: Utilisateur, row: number, col: number) {
 
         if (this.game == null) {
             //erreur
             return
         }
 
-        this.game.RemouveFlagWithRowAndCol(row, col,user.id)
-            this.sendtoallplayer({
-                type: "Flag",
-                action: "remouve",
-                user:user.id,
-                row: row,
-                col: col
-            })
+        this.game.RemouveFlagWithRowAndCol(row, col, user.id)
+        this.sendtoallplayer({
+            type: "Flag",
+            action: "remouve",
+            user: user.id,
+            row: row,
+            col: col
+        })
     }
 
-    deleteGameRoom(){
+    deleteGameRoom() {
         this.sendtoallplayer({
-            type : "DeleteGame"
+            type: "DeleteGame"
         })
         GameRoom.DeleteGameRoom(this)
         this.closeConnection()
@@ -241,15 +272,24 @@ export default class GameRoom {
         return this.roomSize
     }
 
-    getHostID(){
-        return this.host.utilisateur?.id
+    getHostID() {
+        return this.host.id
     }
 
-    getHost() : Client{
-        return this.host
+    getCurentStatus(){
+
+        if (this.game == null){
+            throw new Error ("la Game n'est pas crée")
+        }
+
+        return this.game.getCurentStatus()
     }
 
-    private static AddGameRoom(gameRoom : GameRoom){
+    // getHost() : Client{
+    //     return this.host
+    // }
+
+    private static AddGameRoom(gameRoom: GameRoom) {
         GameRoom.GameRooms[gameRoom.getRoomID()] = gameRoom;
     }
 
@@ -258,7 +298,7 @@ export default class GameRoom {
         return gameroom ? gameroom : null
     }
 
-    static DeleteGameRoom(gameRoom : GameRoom): void {
+    static DeleteGameRoom(gameRoom: GameRoom): void {
         delete GameRoom.GameRooms[gameRoom.roomID]
     }
 }

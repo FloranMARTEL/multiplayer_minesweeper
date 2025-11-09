@@ -15,7 +15,7 @@ export default class Game {
 
     private board: Board
     private gameStatus: GameStatus
-    private discoveredTiles: Set<Tile>
+    private discoveredTiles: { [key: number]: SafeTile }
     private timestemp : number
 
     private flags: { [key : number] : Set<number>}
@@ -24,7 +24,7 @@ export default class Game {
     constructor(seed: number | null, height: number, width: number, nbBomb: number, idplayers : number[],timestemp : number) {
         this.board = new Board(seed, height, width, nbBomb)
         this.gameStatus = GameStatus.InGame
-        this.discoveredTiles = new Set()
+        this.discoveredTiles = {}
 
         this.timestemp = timestemp
 
@@ -38,7 +38,7 @@ export default class Game {
 
     discoverTileWithIndex(index: number,numplayer : number): {tiles : { [key: number]: SafeTile }, nbTiles : number} {
         const startTile: Tile = this.board.getTileWithIndex(index);
-        if (this.discoveredTiles.has(startTile)) {
+        if (index in this.discoveredTiles) {
             return {tiles :{}, nbTiles :0};
         }
 
@@ -47,7 +47,7 @@ export default class Game {
             return {tiles :{}, nbTiles :0};
         }
 
-        this.discoveredTiles.add(startTile);
+        this.discoveredTiles[index] = (startTile);
 
         const tilesFound: { [key: number]: SafeTile } = {};
         const stack: number[] = [index];
@@ -74,9 +74,9 @@ export default class Game {
                     if (rowtarget >= 0 && rowtarget < this.board.height &&
                         coltarget >= 0 && coltarget < this.board.width
                     ) {
-                        const neighborTile = this.board.getTileWithIndex(targetIndex);
-                        if (!this.discoveredTiles.has(neighborTile)) {
-                            this.discoveredTiles.add(neighborTile)
+                        if (!( targetIndex in this.discoveredTiles)) {
+                            const neighborTile = this.board.getTileWithIndex(targetIndex) as SafeTile;
+                            this.discoveredTiles[targetIndex] = neighborTile
                             stack.push(targetIndex);
                         }
                     }
@@ -88,7 +88,7 @@ export default class Game {
         this.cptTileDiscoverd[numplayer] += nbTiles
 
         //
-        if (this.discoveredTiles.size === this.board.width * this.board.height - this.board.nbBomb){
+        if (Object.keys(this.discoveredTiles).length === this.board.width * this.board.height - this.board.nbBomb){
             this.gameStatus = GameStatus.Win
         }
         //
@@ -138,6 +138,32 @@ export default class Game {
 
     getGameStatus(): GameStatus {
         return this.gameStatus
+    }
+
+    getCurentStatus(){
+
+        let flagslist = []
+
+        for(const flag of Object.values(this.flags)){
+            for (const index of flag){
+                flagslist.push(this.indexToRowAndCol(index))
+            }
+        }
+
+        const tilesmaped: { [key: number]: number } = {}
+        for (const key in this.discoveredTiles) {
+            tilesmaped[key] = this.discoveredTiles[key].getValue()
+        }
+
+        console.log(flagslist)
+        console.log(tilesmaped)
+
+        return {
+            gameStatus : this.getGameStatus(),
+            flags : flagslist,
+            tiles : tilesmaped,
+            cptTileDiscoverd : this.cptTileDiscoverd
+        }
     }
 
 

@@ -52,6 +52,7 @@ export default class Board extends React.Component<MyProps, MyState> {
     }
 
     updateTiles(tilesdict: { [key: number]: number }) {
+        
         for (const indextile in tilesdict) {
             const indexTileNumber = Number(indextile)
             const row = Math.floor(indexTileNumber / this.props.width)
