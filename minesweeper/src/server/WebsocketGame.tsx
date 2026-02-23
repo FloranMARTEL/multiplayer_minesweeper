@@ -1,22 +1,26 @@
 import TokenManager from "./TokenManager";
 
-import { GameManager } from "../pages/GameManager";
+import { GameManager,GameManagerPath } from "../pages/GameManager";
 
 export default class WebsocketGame {
 
     client: WebSocket
 
     //if roomID = null send create game
-    constructor(roomId: number | null, gameManager: GameManager) {
+    constructor(stateGame : GameManagerPath, gameManager: GameManager , roomId: number | null = null) {
         this.client = new WebSocket(`ws://${process.env.REACT_APP_API_IP}:5000`);
 
         this.client.onopen = () => {
             console.log("connection open")
 
-            if (roomId === null) {
+            if (stateGame === GameManagerPath.CreateRoom){
                 this.sendCreateGame()
-            } else {
+            }
+            else if (stateGame === GameManagerPath.JoinRoom && roomId !== null){
                 this.sendJoinGame(roomId)
+            }
+            else if (stateGame === GameManagerPath.InGame){
+                this.sendCurentStateGame1()
             }
         }
 
@@ -42,7 +46,23 @@ export default class WebsocketGame {
                 const playerId = jsonmessage.playerId as number
                 gameManager.addPlayer(playerId)
 
-            } else if (jsonmessage.type === "UpdateStateGame") {
+            } else if (jsonmessage.type === "CurentStateGame1"){
+                gameManager.setGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomId, jsonmessage.roomSize)
+                gameManager.setPlayersList(jsonmessage.playersId)
+
+                this.sendCurentStateGame2();
+                
+            }
+            else if (jsonmessage.type === "CurentStateGame2") {
+                const cptTileDiscoverdmaped = jsonmessage.cptTileDiscoverd
+                for (const key in cptTileDiscoverdmaped){
+                    cptTileDiscoverdmaped[key] = {nbTiles : cptTileDiscoverdmaped[key]}
+                }
+                gameManager.setCptTiles(cptTileDiscoverdmaped)
+                gameManager.updateTiles(jsonmessage.tiles)
+                gameManager.setFlags(jsonmessage.flags)
+            }
+            else if (jsonmessage.type === "UpdateStateGame") {
                 gameManager.updateGameStatus(jsonmessage.height, jsonmessage.width, jsonmessage.nbBomb, jsonmessage.roomSize)
             }
 
@@ -104,6 +124,19 @@ export default class WebsocketGame {
             type: "JoinGame",
             roomId: roomID,
             token: await TokenManager.GetToken()
+        }))
+    }
+
+    private async sendCurentStateGame1(){
+        this.client.send(JSON.stringify({
+            type: "CurentStateGame1",
+            token: await TokenManager.GetToken()
+        }))
+    }
+
+    private async sendCurentStateGame2(){
+        this.client.send(JSON.stringify({
+            type: "CurentStateGame2",
         }))
     }
 

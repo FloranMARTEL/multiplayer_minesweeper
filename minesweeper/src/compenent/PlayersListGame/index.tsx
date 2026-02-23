@@ -24,10 +24,15 @@ export default class PlayersListGame extends React.Component<MyProps, MyState> {
         this.state = {playersState}
     }
 
+    setCptTiles(playersState : { [key : number] : {nbTiles : number}}){
+        this.setState({playersState:playersState})
+    }
+
     addCptTiles(userId : number, nbTilesAdd : number){
-        this.state.playersState[userId].nbTiles += nbTilesAdd // m'auvais pratique
+        const copPlayersate = this.state.playersState
+        copPlayersate[userId].nbTiles += nbTilesAdd // m'auvais pratique
         // il faut recrée une list
-        this.setState({}) //update the component
+        this.setState({playersState : copPlayersate}) //update the component
     }
 
     render(): React.ReactNode {

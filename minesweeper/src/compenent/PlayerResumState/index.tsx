@@ -1,6 +1,5 @@
 
-import React, { JSX, useReducer } from "react"
-import ApiMinesweeper from "../../server/ApiMinesweeper"
+import React from "react"
 import PlayerResum from "../PlayerResum"
 
 
@@ -25,7 +24,6 @@ export default class PlayerResumState extends PlayerResum<MyProps> {
                         <img src={this.state.flag} alt={this.state.flag} />
                         :
                         null
-
 
         return (
             <div className="boxOut playerResumStat">

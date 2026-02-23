@@ -34,7 +34,7 @@ export enum GameStatus {
 }
 
 type MyState = {
-    state: null | { // déplacer se si dans le game manager
+    state: null | {
         height: number,
         width: number,
         nbBomb: number,
@@ -50,7 +50,7 @@ type MyProps = {
     location: Location;
 }
 
-enum GameManagerPath {
+export enum GameManagerPath {
     CreateRoom = "createRoom",
     JoinRoom = "joinRoom",
     InGame = "inGame"
@@ -115,7 +115,7 @@ export class GameManager extends React.Component<MyProps, MyState> {
         }
         //
 
-        this.client = new WebsocketGame(roomid, this)
+        this.client = new WebsocketGame(this.props.params.path as GameManagerPath, this,roomid)
 
 
     }
@@ -132,6 +132,8 @@ export class GameManager extends React.Component<MyProps, MyState> {
     }
 
     updateTiles(tiles: { [key: number]: number }) {
+        console.log("66666666666666666")
+        console.log(this.boardRef.current);
         if (this.boardRef.current) {
             this.boardRef.current.updateTiles(tiles)
         }
@@ -152,6 +154,20 @@ export class GameManager extends React.Component<MyProps, MyState> {
     addCptTiles(userId: number, nbTiles: number) {
         if (this.playerListGameRef.current) {
             this.playerListGameRef.current.addCptTiles(userId, nbTiles)
+        }
+    }
+
+    setCptTiles(playersState : { [key : number] : {nbTiles : number}}) {
+        if (this.playerListGameRef.current) {
+            this.playerListGameRef.current.setCptTiles(playersState)
+        }
+    }
+
+    setFlags( flags: {row : number, col :number}[]) {
+        if (this.boardRef.current) {
+            for(const flag of flags){ 
+                this.boardRef.current.setFlag(flag.row, flag.col)
+            }
         }
     }
 
@@ -223,7 +239,7 @@ export class GameManager extends React.Component<MyProps, MyState> {
         let compenent = null
         let page: React.ReactNode = <div></div>
 
-        switch (path) { // TODO faire en sorte que la room prend en change le cas host et non host
+        switch (path) {
             case GameManagerPath.CreateRoom:
 
 
@@ -260,11 +276,7 @@ export class GameManager extends React.Component<MyProps, MyState> {
                         {compenent}
                         <PlayersListGame players={this.state.playersId} ref={this.playerListGameRef} />
                     </main>
-
-
-
         }
-
 
         return (
             page
